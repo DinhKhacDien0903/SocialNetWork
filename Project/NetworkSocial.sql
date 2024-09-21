@@ -8,6 +8,7 @@ create table Users(
 	PasswordHash varchar(64) not null,
 	Email varchar(256),
 	CreatedAt datetime2 default getDate(),
+	UpdateAt datetime2,
 	IsActive bit default 0,
 	LastLogin datetime2
 );
@@ -35,7 +36,6 @@ create table UserRole(
 );
 
 create table Follow(
-	FollowID uniqueidentifier primary key default NewSequentialID(),
 	FollowerID uniqueidentifier not null,
 	FollowingID uniqueidentifier not null,
 	Status smallint,
@@ -188,7 +188,7 @@ alter table UserRole add constraint FK_Users_UserRole foreign key (UserID) refer
 
 alter table Follow add constraint FK_Follow_Follower foreign key (FollowerID) references Users(UserID) on delete cascade,
 					constraint FK_Follow_Following foreign key (FollowingID) references Users(UserID) on delete no action,
-					constraint FK_Unique Unique(FollowerID, FollowingID);
+					constraint PK_Follow primary key(FollowerID, FollowingID);
 
 alter table Post add constraint FK_Users_Post foreign key(UserID) references Users(UserID) on delete cascade;
 
