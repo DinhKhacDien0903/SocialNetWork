@@ -1,0 +1,43 @@
+@import 'variables';
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-size: 62.5%;
+}
+
+body {
+    font-family: $font-family;
+}
+
+ul,
+li,
+ol {
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type='number'] {
+    -moz-appearance: textfield;
+}
+
+input[type='password']::-ms-reveal,
+input[type='password']::-webkit-search-clear-button,
+input[type='password']::-webkit-search-decoration,
+input[type='password']::-webkit-search-input,
+input[type='password']::-webkit-search-submit-button,
+input[type='password']::-webkit-search-cancel-button {
+    display: none;
+}
