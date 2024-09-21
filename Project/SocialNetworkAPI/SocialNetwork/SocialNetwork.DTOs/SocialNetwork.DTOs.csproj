@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="ViewModels\" />
     <Folder Include="Response\" />
-    <Folder Include="Request\" />
   </ItemGroup>
 
   <ItemGroup>
