@@ -3,6 +3,7 @@
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+
         private readonly IMapper _mapper;
 
         public UserService(IUserRepository userRepository, IMapper mapper)
@@ -25,7 +26,7 @@
 
             return true;
         }
-
+ 
         public async Task<IEnumerable<UserViewModel>> GetAllUsersAsync()
         {
             var users = await _userRepository.GetAllAsync();
@@ -35,12 +36,6 @@
         public async Task<UserViewModel> GetUserByIdAsync(Guid id)
         {
             var user = await _userRepository.GetByIDAsync(id);
-            return _mapper.Map<UserViewModel>(user);
-        }
-
-        public async Task<UserViewModel> LoginAsync(string email, string passwordHash)
-        {
-            var user = await _userRepository.GetLoginAsync(email, passwordHash);
             return _mapper.Map<UserViewModel>(user);
         }
     }

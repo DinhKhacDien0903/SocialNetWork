@@ -10,16 +10,18 @@
 
         [Required]
         [StringLength(256)]
-        public string Token { get; set; }
+        public string Token { get; set; } = string.Empty;
 
         [Required]
         [StringLength(256)]
-        public string JwtID { get; set; }
+        public string JwtID { get; set; } = string.Empty;
+
+        public bool IsUsed { get; set; }
 
         [Required]
         public DateTime ExpiredAt { get; set; }
 
         [ForeignKey("UserID")]
-        public UserEntity User { get; set; } = new UserEntity();
+        public UserEntity? User { get; set; }
     }
 }

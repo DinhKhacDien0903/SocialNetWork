@@ -1,4 +1,6 @@
-﻿namespace SocialNetwork.DataAccess.Repositories
+﻿using SocialNetwork.DTOs.Request;
+
+namespace SocialNetwork.DataAccess.Repositories
 {
     public class UserRepository :BaseRepository<UserEntity>, IUserRepository
     {
@@ -14,9 +16,9 @@
             return await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
         }
 
-        public async Task<UserEntity?> GetLoginAsync(string userName, string passwordHash)
+        public async Task<UserEntity?> GetLoginAsync(LoginRequest loginRequest)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName && u.PasswordHash == passwordHash);
+            return await _context.Users.FirstOrDefaultAsync(u => u.UserName == loginRequest.UserName && u.PasswordHash == loginRequest.PasswordHash);
         }
     }
 }

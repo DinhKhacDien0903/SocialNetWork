@@ -36,36 +36,41 @@ namespace SocialNetwork.DataAccess.DataContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // UserRoleEntity
             modelBuilder.Entity<UserRoleEntity>()
                 .HasKey(ur => new { ur.UserID, ur.RoleID });
 
-            // RelationshipEntity
             modelBuilder.Entity<RelationshipEntity>()
                 .HasKey(r => new { r.UserID, r.FriendID });
 
-            // GroupChatMemberEntity
             modelBuilder.Entity<GroupChatMemberEntity>()
                 .HasKey(gcm => new { gcm.GroupChatID, gcm.UserID });
 
-            // ReactionPostEntity
             modelBuilder.Entity<ReactionPostEntity>()
                 .HasKey(rp => new { rp.ReactionID, rp.PostID });
 
-            // ReactionCommentEntity
             modelBuilder.Entity<ReactionCommentEntity>()
                 .HasKey(rc => new { rc.ReactionID, rc.CommentID });
 
-            // ReactionMessageEntity
             modelBuilder.Entity<ReactionMessageEntity>()
                 .HasKey(rm => new { rm.ReactionID, rm.MessageID });
 
-            // ReactionGroupChatMessageEntity
             modelBuilder.Entity<ReactionGroupChatMessageEntity>()
                 .HasKey(rgcm => new { rgcm.ReactionID, rgcm.GroupChatMessageID });
 
             modelBuilder.Entity<GroupChatMessageStatusEntity>()
                .HasKey(g => new { g.GroupChatMessageID, g.UserID});
+
+            modelBuilder.Entity<UserEntity>()
+                .Property(u => u.UserID)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+            modelBuilder.Entity<UserEntity>()
+                .Property(u => u.CreatedAt)
+                .HasDefaultValueSql("GetDate()");
+
+            modelBuilder.Entity<UserEntity>()
+                .Property(u => u.UpdatedAt)
+                .HasDefaultValueSql("GetDate()");
 
             base.OnModelCreating(modelBuilder);
         }
