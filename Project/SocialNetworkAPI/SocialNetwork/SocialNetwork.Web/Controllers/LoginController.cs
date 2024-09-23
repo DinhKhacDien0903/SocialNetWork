@@ -1,4 +1,7 @@
-﻿namespace SocialNetwork.Web.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+using SocialNetwork.DTOs.Authorize;
+
+namespace SocialNetwork.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -23,7 +26,7 @@
                 });
             }
 
-            string token = _userServices.GenerateJwtToken(user);
+            var token = await _userServices.GenerateJwtToken(user);
 
             return Ok(new BaseResponse
             {
@@ -33,6 +36,7 @@
             });
         }
 
+        [Authorize]
         [HttpGet("getUsers")]
         public async Task<IActionResult> GetUsers()
         {
@@ -52,6 +56,41 @@
                 Message = "Get all success success",
                 Data = users
             });
+        }
+
+        [HttpPost("RefreshToken")]
+        public async Task<IActionResult> RefreshToken(TokenModel tokenModel)
+        {
+            try
+            {
+                bool IsValideToken = await _userServices.ValidateToken(tokenModel);
+
+                if(!IsValideToken)
+                {
+                    return BadRequest(new BaseResponse
+                    {
+                        Status = 400,
+                        Message = "Invalid token"
+                    });
+                }
+
+
+                return Ok(new BaseResponse
+                {
+                    Status = 200,
+                    Message = "Refresh token success",
+                    Data = tokenModel
+                });
+
+            }
+            catch
+            {
+                return Ok(new BaseResponse
+                {
+                    Status = 404,
+                    Message = "Something went wrong"
+                });
+            }
         }
     }
 }
