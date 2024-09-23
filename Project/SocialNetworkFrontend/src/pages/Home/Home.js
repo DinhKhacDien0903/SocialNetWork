@@ -1,13 +1,10 @@
-import Footer from '~/components/Footer';
-import Header from '~/components/Header';
+import Post from '~/components/Post';
 
 const Home = () => {
     return (
-        <>
-            <Header />
-            <div>Home</div>
-            <Footer />
-        </>
+        <div className="d-flex justify-content-center mt-5">
+            <Post postInfo={{ id: 1 }} />
+        </div>
     );
 };
 

@@ -7,7 +7,7 @@ export const loginService = ({ username, password }) => {
     });
 };
 
-export const signupService = ({ username, password, name, age, school }) => {
+export const signUpService = ({ username, password, name, age, school }) => {
     return axios.post('/auth/signup', {
         username,
         password,
@@ -15,4 +15,8 @@ export const signupService = ({ username, password, name, age, school }) => {
         age,
         school,
     });
+};
+
+export const logoutService = () => {
+    return axios.post('/auth/logout');
 };
