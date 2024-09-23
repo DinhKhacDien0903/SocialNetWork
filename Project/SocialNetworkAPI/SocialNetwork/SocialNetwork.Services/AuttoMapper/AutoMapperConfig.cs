@@ -5,7 +5,7 @@
         public AutoMapperConfig()
         {
             CreateMap<UserEntity, UserViewModel>();
-            CreateMap<IEnumerable<UserEntity>, IEnumerable<UserViewModel>>();
+            CreateMap<UserViewModel, UserEntity>();
         }
     }
 }

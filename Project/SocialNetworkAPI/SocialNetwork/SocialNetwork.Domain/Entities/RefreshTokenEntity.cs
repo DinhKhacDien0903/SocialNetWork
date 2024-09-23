@@ -22,6 +22,6 @@
         public DateTime ExpiredAt { get; set; }
 
         [ForeignKey("UserID")]
-        public UserEntity User { get; set; } = new UserEntity();
+        public UserEntity? User { get; set; }
     }
 }

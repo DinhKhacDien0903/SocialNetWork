@@ -62,7 +62,7 @@ namespace SocialNetwork.DataAccess.DataContext
 
             modelBuilder.Entity<UserEntity>()
                 .Property(u => u.UserID)
-                .HasDefaultValueSql("NEWID()");
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
 
             modelBuilder.Entity<UserEntity>()
                 .Property(u => u.CreatedAt)

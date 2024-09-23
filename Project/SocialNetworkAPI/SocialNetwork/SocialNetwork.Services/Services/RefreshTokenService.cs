@@ -16,6 +16,7 @@ namespace SocialNetwork.Services.Services
         public async Task CreateRefreshTokenAsync(RefreshTokenEntity entity)
         {
             await  _refreshTokenRepository.AddAsync(entity);
+
             await _refreshTokenRepository.SaveChangeAsync();
         }
 
@@ -24,11 +25,22 @@ namespace SocialNetwork.Services.Services
             return await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token);
         }
 
-        public async Task RefreshTokeByTokenAsync(string token)
+        public async Task UpdateRefreshTokenAsync(string token)
         {
-            var refreshTOken = await GetRefreshTokeByTokenAsync(token);
+            try
+            {
 
-            refreshTOken.IsUsed = true;
+                var refreshToken = await GetRefreshTokeByTokenAsync(token);
+
+                refreshToken.IsUsed = true;
+
+                _refreshTokenRepository.Update(refreshToken);
+
+                await _refreshTokenRepository.SaveChangeAsync();
+            }catch(Exception e)
+            {
+                throw new Exception();
+            }
         }
     }
 }

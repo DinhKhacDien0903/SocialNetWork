@@ -36,7 +36,7 @@
 
         public void Update(T entity)
         {
-            throw new NotImplementedException();
+             _context.Update(entity);
         }
     }
 }
