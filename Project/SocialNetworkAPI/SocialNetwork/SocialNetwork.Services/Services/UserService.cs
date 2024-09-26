@@ -17,7 +17,7 @@ namespace SocialNetwork.Services.Services
             _passwordHasher = passwordHasher;
         }
 
-        public async Task<bool> DeleteUserAsync(Guid id)
+        public async Task<bool> DeleteUserAsync(string id)
         {
             var user = await _userRepository.GetByIDAsync(id);
 
@@ -38,7 +38,7 @@ namespace SocialNetwork.Services.Services
             return _mapper.Map<IEnumerable<UserViewModel>>(users);
         }
 
-        public async Task<UserViewModel> GetUserByIdAsync(Guid id)
+        public async Task<UserViewModel> GetUserByIdAsync(string id)
         {
             var user = await _userRepository.GetByIDAsync(id);
             return _mapper.Map<UserViewModel>(user);

@@ -6,7 +6,7 @@
         public Guid GroupChatID { get; set; }
 
         [Key, Column(Order = 1)]
-        public Guid UserID { get; set; }
+        public string UserID { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime JoinAt { get; set; }

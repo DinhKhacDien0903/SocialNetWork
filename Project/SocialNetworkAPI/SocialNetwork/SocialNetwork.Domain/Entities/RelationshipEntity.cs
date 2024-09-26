@@ -3,10 +3,10 @@
     public  class RelationshipEntity
     {
         [Key, Column(Order = 0)]
-        public Guid UserID { get; set; }
+        public string UserID { get; set; }
 
         [Key, Column(Order = 1)]
-        public Guid FriendID { get; set; }
+        public string FriendID { get; set; }
 
         public bool IsDeleted { get; set; }
 

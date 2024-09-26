@@ -24,7 +24,7 @@
             return await _dbSet.ToListAsync();
         }
 
-        public async Task<T> GetByIDAsync(Guid id)
+        public async Task<T> GetByIDAsync(string id)
         {
             return await _dbSet.FindAsync(id);
         }

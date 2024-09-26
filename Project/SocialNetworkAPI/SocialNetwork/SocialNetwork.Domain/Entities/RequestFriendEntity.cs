@@ -6,10 +6,10 @@
         public Guid RequestFriendID { get; set; }
 
         [Required]
-        public Guid SenderID { get; set; }
+        public string SenderID { get; set; }
 
         [Required]
-        public Guid ReceiverID { get; set; }
+        public string ReceiverID { get; set; }
 
         public bool IsPending { get; set; } = true;
         public bool IsAccepted { get; set; } = false;

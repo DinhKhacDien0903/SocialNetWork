@@ -9,10 +9,10 @@
         public string Content { get; set; }
 
         [Required]
-        public Guid SenderID { get; set; }
+        public string SenderID { get; set; }
 
         [Required]
-        public Guid ReciverID { get; set; }
+        public string ReciverID { get; set; }
 
         public bool IsDeleted { get; set; } = false;
 

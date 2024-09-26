@@ -6,7 +6,7 @@
         public Guid GroupChatMessageID { get; set; }
 
         [Key, Column(Order = 1)]
-        public Guid UserID { get; set; }
+        public string UserID { get; set; }
 
         public bool IsRead { get; set; } = false;
         public bool IsRecived { get; set; } = false;
