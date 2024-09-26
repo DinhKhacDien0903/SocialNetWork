@@ -1,15 +1,18 @@
-﻿using SocialNetwork.DTOs.Authorize;
+﻿using Microsoft.AspNetCore.Identity;
+using SocialNetwork.DTOs.Authorize;
 
 namespace SocialNetwork.Services.IServices
 {
     public interface IAuthorService
     {
-        Task<UserViewModel> LoginAsync(LoginRequest loginRequest);
+        Task<TokenModel> LoginAsync(LoginRequest loginRequest);
 
-        Task<TokenModel> GenerateJwtToken(UserViewModel user);
+        Task<TokenModel> GenerateJwtToken(UserEntity user);
 
         Task<bool> ValidateToken(TokenModel tokenModel);
 
-        Task<UserViewModel> GetUserByRefreshToken(string token);
+        Task<UserEntity> GetUserByRefreshToken(string token);
+
+        Task<IdentityResult> SignUpAsync(SingUpRequest singUpRequest);
     }
 }

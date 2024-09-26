@@ -17,6 +17,7 @@
         public string JwtID { get; set; } = string.Empty;
 
         public bool IsUsed { get; set; }
+        public bool IsRevoked { get; set; }
 
         [Required]
         public DateTime ExpiredAt { get; set; }

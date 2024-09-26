@@ -30,9 +30,11 @@ namespace SocialNetwork.Services.Services
             try
             {
 
+
                 var refreshToken = await GetRefreshTokeByTokenAsync(token);
 
                 refreshToken.IsUsed = true;
+                refreshToken.IsRevoked = true;
 
                 _refreshTokenRepository.Update(refreshToken);
 
