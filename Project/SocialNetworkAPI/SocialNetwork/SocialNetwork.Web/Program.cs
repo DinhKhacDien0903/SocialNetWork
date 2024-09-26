@@ -15,15 +15,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//builder.Services.AddIdentity<UserEntity, IdentityRole>()
-//    .AddEntityFrameworkStores<SocialNetworkdDataContext>().AddDefaultTokenProviders();
+builder.Services.AddIdentity<UserEntity, IdentityRole>()
+    .AddEntityFrameworkStores<SocialNetworkdDataContext>().AddDefaultTokenProviders();
 
-builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
-{
-    options.Stores.MaxLengthForKeys = 128;
-    options.SignIn.RequireConfirmedAccount = false;
-}).AddEntityFrameworkStores<SocialNetworkdDataContext>()
-    .AddDefaultTokenProviders();
+//builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
+//{
+//    options.Stores.MaxLengthForKeys = 128;
+//    options.SignIn.RequireConfirmedAccount = false;
+//}).AddEntityFrameworkStores<SocialNetworkdDataContext>()
+//    .AddDefaultTokenProviders();
 
 builder.Services.AddDbContext<SocialNetworkdDataContext>(options =>
 {
