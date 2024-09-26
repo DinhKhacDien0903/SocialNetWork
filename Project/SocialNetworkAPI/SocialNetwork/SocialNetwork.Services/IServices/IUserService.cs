@@ -1,4 +1,6 @@
-﻿namespace SocialNetwork.Services.IServices
+﻿using SocialNetwork.DTOs.Authorize;
+
+namespace SocialNetwork.Services.IServices
 {
     public interface IUserService
     {
