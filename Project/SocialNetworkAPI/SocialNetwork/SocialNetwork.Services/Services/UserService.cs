@@ -1,4 +1,6 @@
-﻿namespace SocialNetwork.Services.Services
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace SocialNetwork.Services.Services
 {
     public class UserService : IUserService
     {
@@ -6,10 +8,13 @@
 
         private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository, IMapper mapper)
+        private readonly IPasswordHasher<IdentityUser> _passwordHasher;
+
+        public UserService(IUserRepository userRepository, IMapper mapper, IPasswordHasher<IdentityUser> passwordHasher)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _passwordHasher = passwordHasher;
         }
 
         public async Task<bool> DeleteUserAsync(Guid id)
@@ -37,6 +42,22 @@
         {
             var user = await _userRepository.GetByIDAsync(id);
             return _mapper.Map<UserViewModel>(user);
+        }
+
+        public string HashPassWord(string password)
+        {
+            var user = new IdentityUser();
+            var passwordHashed = _passwordHasher.HashPassword(user, password);
+
+            return passwordHashed;
+        }
+
+        public bool VerifyPassword(string hashedPassword, string providePassword)
+        {
+            var user = new IdentityUser();
+            var result = _passwordHasher.VerifyHashedPassword(user, hashedPassword, providePassword);
+
+            return result == PasswordVerificationResult.Success;
         }
     }
 }
