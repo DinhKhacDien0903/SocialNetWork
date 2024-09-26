@@ -1,19 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SocialNetwork.Domain.Entities;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace SocialNetwork.DataAccess.DataContext
 {
-    public class SocialNetworkdDataContext : DbContext
+    public class SocialNetworkdDataContext : IdentityDbContext<UserEntity>
     {
         public SocialNetworkdDataContext(DbContextOptions<SocialNetworkdDataContext> options) : base(options)
         {
         }
 
-        public DbSet<UserEntity> Users { get; set; }
-        public DbSet<UserInforEntity> UserInfors { get; set; }
+        //public DbSet<UserEntity> Users { get; set; }
+        //public DbSet<UserInforEntity> UserInfors { get; set; }
         public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
-        public DbSet<RoleEntity> Roles { get; set; }
-        public DbSet<UserRoleEntity> UserRoles { get; set; }
+        //public DbSet<RoleEntity> Roles { get; set; }
+        //public DbSet<UserRoleEntity> UserRoles { get; set; }
         public DbSet<RelationshipEntity> Relationships { get; set; }
         public DbSet<RequestFriendEntity> RequestFriends { get; set; }
         public DbSet<PostEntity> Posts { get; set; }
@@ -60,19 +59,29 @@ namespace SocialNetwork.DataAccess.DataContext
             modelBuilder.Entity<GroupChatMessageStatusEntity>()
                .HasKey(g => new { g.GroupChatMessageID, g.UserID});
 
-            modelBuilder.Entity<UserEntity>()
-                .Property(u => u.UserID)
-                .HasDefaultValueSql("NEWSEQUENTIALID()");
+            //modelBuilder.Entity<UserEntity>()
+            //    .Property(u => u.Id)
+            //    .HasDefaultValueSql("NEWSEQUENTIALID()");
 
-            modelBuilder.Entity<UserEntity>()
-                .Property(u => u.CreatedAt)
-                .HasDefaultValueSql("GetDate()");
+            //modelBuilder.Entity<UserEntity>()
+            //    .Property(u => u.CreatedAt)
+            //    .HasDefaultValueSql("GetDate()");
 
-            modelBuilder.Entity<UserEntity>()
-                .Property(u => u.UpdatedAt)
-                .HasDefaultValueSql("GetDate()");
+            //modelBuilder.Entity<UserEntity>()
+            //    .Property(u => u.UpdatedAt)
+            //    .HasDefaultValueSql("GetDate()");
 
             base.OnModelCreating(modelBuilder);
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                var tableName = entityType.GetTableName();
+                if (tableName.StartsWith("AspNet"))
+                {
+                    entityType.SetTableName(tableName.Substring(6));
+                }
+            }
+
         }
 
     }

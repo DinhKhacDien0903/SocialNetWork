@@ -3,7 +3,7 @@
     public class UserInforEntity : BaseEntity
     {
         [Key]
-        public Guid UserID { get; set; }
+        public string UserID { get; set; }
 
         [StringLength(50)]
         public string? FirstName { get; set; }

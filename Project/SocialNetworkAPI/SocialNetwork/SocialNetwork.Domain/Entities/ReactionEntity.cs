@@ -6,7 +6,7 @@
         public Guid ReactionID { get; set; }
 
         [Required]
-        public Guid UserID { get; set; }
+        public string UserID { get; set; }
 
         [Required]
         public Guid EmotionTypeID { get; set; }

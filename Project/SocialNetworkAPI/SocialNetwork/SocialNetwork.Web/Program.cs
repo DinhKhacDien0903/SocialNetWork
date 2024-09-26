@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SocialNetwork.Domain.Entities;
 using SocialNetwork.DTOs.Authorize;
 using SocialNetwork.Services.AuttoMapper;
 
@@ -13,10 +15,27 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//builder.Services.AddIdentity<UserEntity, IdentityRole>()
+//    .AddEntityFrameworkStores<SocialNetworkdDataContext>().AddDefaultTokenProviders();
+
+builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
+{
+    options.Stores.MaxLengthForKeys = 128;
+    options.SignIn.RequireConfirmedAccount = false;
+}).AddEntityFrameworkStores<SocialNetworkdDataContext>()
+    .AddDefaultTokenProviders();
+
 builder.Services.AddDbContext<SocialNetworkdDataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+builder.Services.AddScoped<IPasswordHasher<IdentityUser>, PasswordHasher<IdentityUser>>();
+
+
+//builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+//            .AddEntityFrameworkStores<SocialNetworkdDataContext>()
+//            .AddDefaultTokenProviders();
 
 builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"));
 

@@ -6,7 +6,7 @@
         public Guid PostID { get; set; }
 
         [Required]
-        public Guid UserID { get; set; }
+        public string UserID { get; set; }
 
         [Required]
         public string Content { get; set; }

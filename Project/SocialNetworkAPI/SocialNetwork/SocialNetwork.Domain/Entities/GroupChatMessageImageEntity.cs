@@ -9,7 +9,7 @@
         public Guid GroupChatMessageID { get; set; }
 
         [Required]
-        public Guid UserID { get; set; }
+        public string UserID { get; set; }
 
         [StringLength(255)]
         public string ImageUrl { get; set; } = string.Empty;

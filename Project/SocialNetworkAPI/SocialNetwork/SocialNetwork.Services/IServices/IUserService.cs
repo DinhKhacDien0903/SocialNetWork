@@ -6,9 +6,12 @@ namespace SocialNetwork.Services.IServices
     {
         Task<IEnumerable<UserViewModel>> GetAllUsersAsync();
 
-        Task<UserViewModel> GetUserByIdAsync(Guid id);
+        Task<UserViewModel> GetUserByIdAsync(string id);
 
-        Task<bool> DeleteUserAsync(Guid id);
-       
+        Task<bool> DeleteUserAsync(string id);
+
+        string HashPassWord(string password);
+
+        bool VerifyPassword(string hashedPassword, string providePassword);
     }
 }
