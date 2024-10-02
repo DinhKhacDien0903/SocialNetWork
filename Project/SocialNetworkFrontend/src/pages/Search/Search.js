@@ -1,8 +1,11 @@
-import clsx from 'clsx';
-import styles from './Search.module.scss';
+import SearchInput from '~/components/SearchInput';
 
 const Search = () => {
-    return <div>Search AE ƠI</div>;
+    return (
+        <>
+            <SearchInput />
+        </>
+    );
 };
 
 export default Search;
