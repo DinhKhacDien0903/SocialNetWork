@@ -50,13 +50,28 @@ builder.Services.AddScoped(typeof(IUserService), typeof(UserService));
 builder.Services.AddScoped(typeof(IRefreshTokenService), typeof(RefreshTokenService));
 builder.Services.AddScoped(typeof(IAuthorService), typeof(AuthorService));
 
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("AllowOrigin", builder =>
+    {
+        builder.WithOrigins("http://localhost:3000")
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+    });
+});
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(opt =>
+}).AddCookie(opt =>
+{
+    opt.Cookie.Name = "token";
+})
+    
+    .AddJwtBearer(opt =>
 {
     opt.TokenValidationParameters = new TokenValidationParameters
     {
@@ -69,6 +84,21 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"] ?? string.Empty)),
         ClockSkew = TimeSpan.Zero
     };
+
+    opt.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            context.Token = context.Request.Cookies["token"];
+            return Task.CompletedTask;
+        }
+    };
+
+}).AddGoogle(options =>
+{
+    options.ClientId = builder.Configuration["GoogleAuthSetting:ClientID"];
+    options.ClientSecret = builder.Configuration["GoogleAuthSetting:ClientSecret"];
+    options.CallbackPath = "/signin-google";
 });
 
 builder.Services.AddSwaggerGen(c =>
@@ -116,6 +146,7 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "SocialNetwork.Web V1");
     c.RoutePrefix = "swagger";
 });
+
 
 app.UseHttpsRedirection();
 

@@ -14,5 +14,7 @@ namespace SocialNetwork.Services.IServices
         Task<UserEntity> GetUserByRefreshToken(string token);
 
         Task<IdentityResult> SignUpAsync(SingUpRequest singUpRequest);
+
+        void SaveAccessTokenToCookieHttpOnly(string accessToken);
     }
 }

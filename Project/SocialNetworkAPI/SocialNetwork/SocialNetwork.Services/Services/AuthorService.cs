@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -17,13 +18,15 @@ namespace SocialNetwork.Services.Services
         private readonly JwtConfig _jwtConfig;
         private readonly UserManager<UserEntity> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthorService(
             IUserRepository userRepository,
             IMapper mapper, IOptionsMonitor<JwtConfig> config, 
             IRefreshTokenService refreshTokenService,
             UserManager<UserEntity> userManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            IHttpContextAccessor httpContextAccessor)
         {
             _userRepository = userRepository;
             _mapper = mapper;
@@ -31,6 +34,7 @@ namespace SocialNetwork.Services.Services
             _refreshTokenService = refreshTokenService;
             _userManager = userManager;
             _roleManager = roleManager;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<TokenModel> LoginAsync(LoginRequest loginRequest)
@@ -232,6 +236,24 @@ namespace SocialNetwork.Services.Services
             }
 
             return result;
+        }
+
+        public void SaveAccessTokenToCookieHttpOnly(string accessToken)
+        {
+            var cookieOption = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                Expires = DateTime.UtcNow.AddDays(1)
+            };
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            if (httpContext == null)
+            {
+                throw new Exception("HttpContext is not available.");
+            }
+
+            httpContext.Response.Cookies.Append("token", accessToken, cookieOption);
         }
     }
 }
