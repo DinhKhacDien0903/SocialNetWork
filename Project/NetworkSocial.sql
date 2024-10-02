@@ -8,6 +8,7 @@ create table Users(
 	PasswordHash varchar(64) not null,
 	Email varchar(256),
 	CreatedAt datetime2 default getDate(),
+	UpdatedAt datetime2 default getDate(),
 	IsActive bit default 0,
 	LastLogin datetime2
 );
@@ -24,6 +25,15 @@ create table UserInfor(
 	--foreign key on delete casede
 )
 
+create table RefreshToken(
+	RefreshTokenID uniqueidentifier primary key default NewSequentialID(),
+	UserID uniqueidentifier not null,
+	Token varchar(256) not null,
+	JwtID varchar(256) not null,
+	CreatedAt datetime2 default getDate(),
+	ExpiredAt datetime2 not null
+);
+
 create table Roles(
 	RoleID uniqueIdentifier primary key default NewSequentialID(),
 	RoleName nvarchar(50)
@@ -34,13 +44,24 @@ create table UserRole(
 	RoleID uniqueIdentifier not null
 );
 
-create table Follow(
-	FollowID uniqueidentifier primary key default NewSequentialID(),
-	FollowerID uniqueidentifier not null,
-	FollowingID uniqueidentifier not null,
-	Status smallint,
-	FollowAt Date default getDate(), 
-	--fore key on delete casede and unique
+create table Relationship(
+	UserID uniqueidentifier not null,
+	FriendID uniqueidentifier not null,
+	IsDeleted bit default 0,
+	UpdatedAt datetime2 default getDate(),
+	DeletedAt datetime2 default getDate()
+	
+);
+
+create table RequestFriend(
+	RequestFriendID uniqueidentifier primary key default NewSequentialID(),
+	SenderID uniqueidentifier not null,
+	ReceiverID uniqueidentifier not null,
+	IsPending bit default 1,
+	IsAccepted bit default 0,
+	IsRejected bit default 0,
+	CreatedAt datetime2 default getDate(),
+	UpdatedAt datetime2 default getDate()
 );
 
 create table Post(
@@ -48,7 +69,7 @@ create table Post(
 	UserID uniqueidentifier not null,
 	Content nvarchar(max) not null,
 	PostAt datetime2,
-	UpdatedAt datetime2,
+	UpdatedAt datetime2 default getDate(),
 	IsDelete bit default 0
 	--fore key on delete casede
 )
@@ -69,7 +90,7 @@ create table Comment(
 	ParentCommentID uniqueidentifier null,
 	Content nvarchar(max) not null,
 	CreatedAt datetime2 default getDate(),
-	UpdatedAt datetime2,
+	UpdatedAt datetime2 default getDate(),
 	IsDelete bit default 0
 	--fore key on delete casede
 );
@@ -81,7 +102,7 @@ create table Messages(
 	ReciverID uniqueidentifier not null,
 	IsDeleted bit default 0,
 	SendAt datetime2 default getDate(),
-	UpdatedAt datetime2,
+	UpdatedAt datetime2 default getDate(),
 );
 
 create table MessageStatus(
@@ -104,7 +125,7 @@ create table GroupChat(
 	GroupName nvarchar(50),
 	Description nvarchar(255),
 	CreatedAt datetime2 default getDate(),
-	UpdatedAt datetime2
+	UpdatedAt datetime2 default getDate()
 );
 
 create table GroupChatMemeber(
@@ -123,7 +144,7 @@ create table GroupChatMessage(
 	Content nvarchar(max) not null,
 	IsDeleted bit default 0,
 	SendAt datetime2 default getDate(),
-	UpdatedAt datetime2,
+	UpdatedAt datetime2 default getDate(),
 	--them khoa chinh ket hop, on deleted case
 );
 
@@ -186,10 +207,6 @@ alter table UserRole add constraint FK_Users_UserRole foreign key (UserID) refer
 						 constraint FK_Role_UserRole foreign key (RoleID) references Roles(RoleID) on delete cascade,
 						 constraint PK_UserRole primary key (UserID, RoleID);
 
-alter table Follow add constraint FK_Follow_Follower foreign key (FollowerID) references Users(UserID) on delete cascade,
-					constraint FK_Follow_Following foreign key (FollowingID) references Users(UserID) on delete no action,
-					constraint FK_Unique Unique(FollowerID, FollowingID);
-
 alter table Post add constraint FK_Users_Post foreign key(UserID) references Users(UserID) on delete cascade;
 
 alter table ImageOfPost add  constraint FK_Post_ImageOfPost foreign key(PostID) references Post(PostID) on delete cascade;
@@ -241,3 +258,12 @@ alter table ReactionMessage add constraint PK_ReactionMessage primary key (React
 alter table ReactionGroupChatMessage add constraint PK_ReactionGroupChatMessage primary key (ReactionID,GroupChatMessageID),
 							 constraint FK_Reaction_ReactionGroupChatMessage foreign key (ReactionID) references Reaction(ReactionID),
 							 constraint FK_GroupChatMessage_ReactionGroupChatMessage foreign key (GroupChatMessageID) references GroupChatMessage(GroupChatMessageID) on delete cascade;
+
+alter table Relationship add constraint FK_User_Relationship foreign key (UserID) references Users(UserID) on delete cascade,
+					constraint FK_Friend_Relationship foreign key (FriendID) references Users(UserID) on delete no action,
+					constraint PK_Relationship primary key(UserID, FriendID);
+
+alter table RequestFriend add constraint FK_Sender_RequestFriend foreign key (SenderID) references Users(UserID) on delete cascade,
+					constraint FK_Reciver_RequestFriend foreign key (ReceiverID) references Users(UserID) on delete no action;
+
+alter table RefreshToken add constraint FK_User_RefreshToken foreign key (UserID) references Users(UserID);
