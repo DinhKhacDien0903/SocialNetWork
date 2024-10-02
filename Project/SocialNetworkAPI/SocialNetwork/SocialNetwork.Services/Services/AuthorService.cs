@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using SocialNetwork.DTOs.Authorize;
@@ -14,26 +16,44 @@ namespace SocialNetwork.Services.Services
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly IMapper _mapper;
         private readonly JwtConfig _jwtConfig;
+        private readonly UserManager<UserEntity> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthorService(
             IUserRepository userRepository,
             IMapper mapper, IOptionsMonitor<JwtConfig> config, 
-            IRefreshTokenService refreshTokenService)
+            IRefreshTokenService refreshTokenService,
+            UserManager<UserEntity> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IHttpContextAccessor httpContextAccessor)
         {
             _userRepository = userRepository;
             _mapper = mapper;
             _jwtConfig = config.CurrentValue;
             _refreshTokenService = refreshTokenService;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<UserViewModel> LoginAsync(LoginRequest loginRequest)
+        public async Task<TokenModel> LoginAsync(LoginRequest loginRequest)
         {
             var user = await _userRepository.GetLoginAsync(loginRequest);
 
-            return _mapper.Map<UserViewModel>(user);
-        }
+            if (user == null)
+            {
+                throw new Exception("Email or password is not correct!");
+            }
 
-        public async Task<TokenModel> GenerateJwtToken(UserViewModel user)
+            //var userViewModel = _mapper.Map<UserViewModel>(user);
+
+            var token = await GenerateJwtToken(user);
+
+            return token;
+        }
+        
+        public async Task<TokenModel> GenerateJwtToken(UserEntity user)
         {
             var secretKey = Encoding.UTF8.GetBytes(_jwtConfig.SecretKey);
 
@@ -42,16 +62,23 @@ namespace SocialNetwork.Services.Services
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim("ID", Guid.NewGuid().ToString()),
-                    new Claim(JwtRegisteredClaimNames.Sub, user.UserID.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 }),
 
                 Issuer = _jwtConfig.Issuer,
                 Audience = _jwtConfig.Audience,
-                Expires = DateTime.UtcNow.AddMinutes(1),
+                Expires = DateTime.UtcNow.AddMinutes(15),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKey), SecurityAlgorithms.HmacSha256)
             };
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            foreach(var role in userRoles)
+            {
+                tokenDescription.Subject.AddClaim(new Claim (ClaimTypes.Role, role.ToString()));
+            }
 
             var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
 
@@ -63,9 +90,9 @@ namespace SocialNetwork.Services.Services
             var refreshTokenEntity = new RefreshTokenEntity
             {
                 RefreshTokenID = Guid.NewGuid(),
-                UserID = user.UserID,
+                UserID = user.Id,
                 Token = refreshToken,
-                ExpiredAt = DateTime.UtcNow.AddSeconds(20),
+                ExpiredAt = DateTime.UtcNow.AddDays(30),
                 JwtID = token.Id,
                 IsUsed = false,
                 CreatedAt = DateTime.UtcNow
@@ -164,16 +191,20 @@ namespace SocialNetwork.Services.Services
                 return false;
             }
 
+            if (refreshToken.IsRevoked)
+            {
+                return false;
+            }
             return true;
         }
 
-        public async Task<UserViewModel> GetUserByRefreshToken(string token)
+        public async Task<UserEntity> GetUserByRefreshToken(string token)
         {
             var refreshToken = await _refreshTokenService.GetRefreshTokeByTokenAsync(token);
 
             var user = await _userRepository.GetByIDAsync(refreshToken.UserID);
 
-            return _mapper.Map<UserViewModel>(user);
+            return user;
         }
 
         private DateTime ConvertUnixTimeStampToDateTime(long utcExpire)
@@ -184,5 +215,45 @@ namespace SocialNetwork.Services.Services
             return dateTimeInterval;
         }
 
+        public async Task<IdentityResult> SignUpAsync(SingUpRequest signUpRequest)
+        {
+            var user = new UserEntity
+            {
+                UserName = signUpRequest.UserName,
+                Email = signUpRequest.Email,
+                PhoneNumber = signUpRequest.PhoneNumber
+            };
+
+            var result =  await _userManager.CreateAsync(user, signUpRequest.Password);
+            if (result.Succeeded)
+            {
+                if (!await _roleManager.RoleExistsAsync(ApplicationRoleModel.User))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(ApplicationRoleModel.User));
+                }
+
+                await _userManager.AddToRoleAsync(user, ApplicationRoleModel.User);
+            }
+
+            return result;
+        }
+
+        public void SaveAccessTokenToCookieHttpOnly(string accessToken)
+        {
+            var cookieOption = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                Expires = DateTime.UtcNow.AddDays(1)
+            };
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            if (httpContext == null)
+            {
+                throw new Exception("HttpContext is not available.");
+            }
+
+            httpContext.Response.Cookies.Append("token", accessToken, cookieOption);
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using SocialNetwork.DTOs.Request;
+﻿using Microsoft.AspNetCore.Identity;
+using SocialNetwork.DTOs.Request;
 
 namespace SocialNetwork.DataAccess.Repositories
 {
@@ -6,9 +7,11 @@ namespace SocialNetwork.DataAccess.Repositories
     {
         public readonly SocialNetworkdDataContext _context;
 
-        public UserRepository(SocialNetworkdDataContext context) : base(context)
+        private readonly UserManager<UserEntity> _userManager;
+        public UserRepository(SocialNetworkdDataContext context, UserManager<UserEntity> userManager) : base(context)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<UserEntity?> GetByUserNameAsync(string userName)
@@ -18,7 +21,12 @@ namespace SocialNetwork.DataAccess.Repositories
 
         public async Task<UserEntity?> GetLoginAsync(LoginRequest loginRequest)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.UserName == loginRequest.UserName && u.PasswordHash == loginRequest.PasswordHash);
+            var user =  await _userManager.FindByEmailAsync(loginRequest.Email);
+            if(user != null && await _userManager.CheckPasswordAsync(user, loginRequest.Password))
+            {
+                return user;
+            }
+            return null;
         }
     }
 }

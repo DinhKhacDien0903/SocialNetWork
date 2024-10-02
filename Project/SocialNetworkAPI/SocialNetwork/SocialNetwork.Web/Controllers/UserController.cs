@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using SocialNetwork.DTOs.Authorize;
 
 namespace SocialNetwork.Web.Controllers
 {
@@ -10,7 +11,7 @@ namespace SocialNetwork.Web.Controllers
             _userServices = userServices;
         }
 
-        [Authorize]
+        [Authorize(Roles = ApplicationRoleModel.User)]
         [HttpGet("getUsers")]
         public async Task<IActionResult> GetUsers()
         {
