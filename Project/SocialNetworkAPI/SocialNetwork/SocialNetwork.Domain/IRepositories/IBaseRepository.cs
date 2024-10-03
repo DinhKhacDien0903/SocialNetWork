@@ -6,7 +6,7 @@
 
         Task<T> GetByIDAsync(string id);
 
-        Task AddAsync(T entity);
+        Task<T> AddAsync(T entity);
 
         void Update(T entity);
 

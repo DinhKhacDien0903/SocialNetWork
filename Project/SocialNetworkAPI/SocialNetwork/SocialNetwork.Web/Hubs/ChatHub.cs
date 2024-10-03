@@ -7,7 +7,7 @@ namespace SocialNetwork.Web.Hubs
 {
     public class ChatHub : Hub
     {
-        private readonly UserManager<UserEntity> _userManager;
+        private readonly UserManager<UserEntity> _userManager;  
         private readonly IChatHubService _chatHubService;
         public ChatHub(
             UserManager<UserEntity> userManager,
@@ -42,11 +42,11 @@ namespace SocialNetwork.Web.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        public async Task SendMessageToPerson(string RecevierId, string message)
+        public async Task<string> SendMessageToPerson(string recevierId, string message)
         {
             var sender = await ValidateCurrentAccount();
 
-            var reciver = await _userManager.FindByIdAsync(RecevierId);
+            var reciver = await _userManager.FindByIdAsync(recevierId);
             
             var sendDate = DateTime.UtcNow;
 
@@ -54,7 +54,7 @@ namespace SocialNetwork.Web.Hubs
             {
                 await Clients.Caller.SendAsync("UserNotConnected", "User not found!");
 
-                return;
+                return "";
             }
 
             var messageViewModel = new MessageViewModel
@@ -65,9 +65,11 @@ namespace SocialNetwork.Web.Hubs
                 CreatedAt = sendDate
             };
 
-            await _chatHubService.AddMessagePerson(messageViewModel);
+            var messageID = await _chatHubService.AddMessagePerson(messageViewModel);
 
             await Clients.User(reciver.Id).SendAsync("ReceiveSpecitificMessage", sender.UserName, message, sendDate);
+
+            return messageID;
         }
 
 

@@ -39,6 +39,7 @@ namespace SocialNetwork.DataAccess.Repositories
             }
 
             user.IsActive = isActive;
+
             user.LastLogin = DateTime.Now;
 
             await _userManager.UpdateAsync(user);

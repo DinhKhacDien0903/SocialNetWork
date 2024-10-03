@@ -19,10 +19,13 @@ namespace SocialNetwork.Services.Services
             _mapper = mapper;
         }
 
-        public async Task AddMessagePerson(MessageViewModel messageViewModel)
+        public async Task<string> AddMessagePerson(MessageViewModel messageViewModel)
         {
             var entity = _mapper.Map<MessagesEntity>(messageViewModel);
-            await _messageRepository.AddAsync(entity);
+
+            var x =  await _messageRepository.AddAsync(entity);
+
+            return x.MessageID.ToString();
         }
 
         public async Task UpdateStatusActiveUser(string userId, bool isActive)

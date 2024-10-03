@@ -4,6 +4,6 @@
     {
         Task UpdateStatusActiveUser(string userId, bool isActive);
 
-        Task AddMessagePerson(MessageViewModel messageViewModel);
+        Task<string> AddMessagePerson(MessageViewModel messageViewModel);
     }
 }
