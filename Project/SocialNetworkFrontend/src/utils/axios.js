@@ -3,7 +3,7 @@ import store from '~/redux/store';
 import { clearUserInfo } from '~/redux/actions';
 
 const instance = axios.create({
-    baseURL: 'http://localhost:8080',
+    baseURL: 'https://localhost:7072/api',
     withCredentials: true,
 });
 

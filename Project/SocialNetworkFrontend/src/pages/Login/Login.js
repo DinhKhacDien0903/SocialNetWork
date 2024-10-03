@@ -29,19 +29,19 @@ function Login() {
         }
     }, []);
 
-    const [loginInfo, setLoginInfo] = useState({ username: '', password: '' });
+    const [loginInfo, setLoginInfo] = useState({ email: '', password: '' });
     const [showPasswordLogin, setShowPasswordLogin] = useState(false);
     const [validatedFormLogin, setValidatedFormLogin] = useState(false);
     const [errorLogin, setErrorLogin] = useState('');
 
     const loginFormRef = useRef(null);
     const signUpFormRef = useRef(null);
-    const usernameSignupRef = useRef(null);
+    const emailSignupRef = useRef(null);
 
     const [signUpInfo, setSignUpInfo] = useState({
         lastName: '',
         firstName: '',
-        username: '',
+        email: '',
         password: '',
         confirmPassword: '',
     });
@@ -49,7 +49,7 @@ function Login() {
     const [showFormSignUp, setShowFormSignUp] = useState(false);
     const [showPasswordSignUp, setShowPasswordSignUp] = useState(false);
     const [validatedFormSignUp, setValidatedFormSignUp] = useState(false);
-    const [usernameExisted, setUsernameExisted] = useState([]);
+    const [emailExisted, setemailExisted] = useState([]);
 
     const toggleShowPasswordLogin = () => {
         setShowPasswordLogin(!showPasswordLogin);
@@ -130,7 +130,7 @@ function Login() {
                 await signUpService({
                     lastName: signUpInfo.lastName,
                     firstName: signUpInfo.firstName,
-                    username: signUpInfo.username,
+                    email: signUpInfo.email,
                     password: signUpInfo.password,
                 });
 
@@ -139,7 +139,7 @@ function Login() {
                 setSignUpInfo({
                     lastName: '',
                     firstName: '',
-                    username: '',
+                    email: '',
                     password: '',
                     confirmPassword: '',
                 });
@@ -151,7 +151,7 @@ function Login() {
         } catch (error) {
             if (Number(error.status) === 400) {
                 setValidatedFormSignUp(true);
-                setUsernameExisted([...usernameExisted, signUpInfo.username]);
+                setemailExisted([...emailExisted, signUpInfo.email]);
             }
         }
     };
@@ -168,11 +168,11 @@ function Login() {
                 <Form ref={loginFormRef} noValidate validated={validatedFormLogin}>
                     <Form.Group className="mb-3" as={Col} md="12">
                         <Form.Control
-                            value={loginInfo.username}
-                            name="username"
+                            value={loginInfo.email}
+                            name="email"
                             className="fz-16"
                             type="text"
-                            placeholder="Username"
+                            placeholder="email"
                             required
                             onKeyUp={handleEnterToLogin}
                             onChange={handleChangeFormLogin}
@@ -254,19 +254,19 @@ function Login() {
                                 </Row>
                                 <Form.Group className="mb-3" as={Col} md="12">
                                     <Form.Control
-                                        ref={usernameSignupRef}
-                                        value={signUpInfo.username}
-                                        name="username"
+                                        ref={emailSignupRef}
+                                        value={signUpInfo.email}
+                                        name="email"
                                         className={clsx('fz-16', {
-                                            [styles['invalid']]: usernameExisted.includes(signUpInfo.username),
+                                            [styles['invalid']]: emailExisted.includes(signUpInfo.email),
                                         })}
-                                        placeholder="Username"
+                                        placeholder="email"
                                         required
                                         onKeyUp={handleEnterToSignup}
-                                        isInvalid={usernameExisted.includes(signUpInfo.username)}
+                                        isInvalid={emailExisted.includes(signUpInfo.email)}
                                         onChange={handleChangeFormSignUp}
                                     />
-                                    {usernameExisted.includes(signUpInfo.username) && (
+                                    {emailExisted.includes(signUpInfo.email) && (
                                         <Form.Control.Feedback className="fz-16" type="invalid">
                                             Tài khoản đã tồn tại
                                         </Form.Control.Feedback>
