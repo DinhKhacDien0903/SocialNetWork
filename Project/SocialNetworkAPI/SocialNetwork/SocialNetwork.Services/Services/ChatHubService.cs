@@ -25,6 +25,7 @@ namespace SocialNetwork.Services.Services
 
             var x =  await _messageRepository.AddAsync(entity);
 
+            await _messageRepository.SaveChangeAsync();
             return x.MessageID.ToString();
         }
 

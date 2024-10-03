@@ -48,7 +48,7 @@ namespace SocialNetwork.Web.Hubs
 
             var reciver = await _userManager.FindByIdAsync(recevierId);
             
-            var sendDate = DateTime.UtcNow;
+            var sendDate = DateTime.UtcNow.AddHours(7);
 
             if(reciver == null)
             {
