@@ -17,6 +17,13 @@ function NavigateFunctionComponent() {
 }
 
 function App() {
+    const friend = {
+        id: 'd6b95a50-23ed-4a7c-9b45-1dd6e3afb959',
+        firstname: 'dien',
+        lastname: 'dinh',
+        avatar: '123.jpg',
+    };
+
     return (
         <BrowserRouter>
             <NavigateFunctionComponent />

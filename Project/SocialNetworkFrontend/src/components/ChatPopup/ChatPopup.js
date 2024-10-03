@@ -12,11 +12,15 @@ import socket from '~/socket';
 import _ from 'lodash';
 import useClickOutside from '~/hook/useClickOutside';
 
+import { HubConnectionBuilder } from '@microsoft/signalr';
+
+const conn = new HubConnectionBuilder().withUrl('https://localhost:7072/chatPerson').build();
+
 const ChatPopup = ({ friend }) => {
     const { ref: chatPopupRef, isComponentVisible: isFocus, setIsComponentVisible: setIsFocus } = useClickOutside(true);
-    // const userInfo = useSelector(userInfoSelector);
+    //  const userInfo = useSelector(userInfoSelector);
     const userInfo = {
-        id: 'e8490337-4a87-4665-b0d4-8fea750488ba',
+        id: 'eff0db6c-e280-415b-ad1d-8687188d3445',
     };
     const dispatch = useDispatch();
 
@@ -25,6 +29,7 @@ const ChatPopup = ({ friend }) => {
     const [messages, setMessages] = useState([]);
 
     const [sendMessage, setSendMessage] = useState('');
+
     const [processingMessage, setProcessingMessage] = useState('');
 
     const messageList = [
@@ -72,6 +77,54 @@ const ChatPopup = ({ friend }) => {
         },
     ];
 
+    const [connection, setConnecion] = useState('');
+
+    // setConnecion(conn);
+
+    const sendMessageToPerson = async (friend, clone) => {
+        console.log('dsadsa');
+        try {
+            const RecevierId = friend?.id;
+            const message = clone;
+            conn.on('ReceiveSpecitificMessage', ({ username, message, sendDate }) => {
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        sender: userInfo?.id,
+                        message: sendMessage,
+                    },
+                ]);
+                console.log(`${username} has send ${message}`);
+            });
+
+            await conn.start();
+
+            setSendMessage('');
+
+            setProcessingMessage('Đang xử lý');
+
+            const res = await conn.invoke('SendMessageToPerson', { RecevierId, message });
+
+            setMessages((prev) => {
+                const index = _.findIndex(prev, { id: null, message: clone });
+
+                if (index === -1) return prev;
+
+                const updatedMessages = _.cloneDeep(prev);
+
+                updatedMessages[index] = { ...updatedMessages[index], id: res?.id };
+
+                return updatedMessages;
+            });
+
+            setProcessingMessage('');
+
+            console.log(`Sending message to ${RecevierId}: ${message}`);
+        } catch (e) {
+            console.log(e.message);
+        }
+    };
+
     useEffect(() => {
         const fetchMessages = async () => {
             try {
@@ -93,36 +146,36 @@ const ChatPopup = ({ friend }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [friend?.id]);
 
-    const handleSendMessage = async () => {
-        try {
-            setMessages((prev) => [
-                ...prev,
-                {
-                    id: null,
-                    sender: userInfo?.id,
-                    message: sendMessage,
-                },
-            ]);
-            const clone = sendMessage;
-            setSendMessage('');
-            setProcessingMessage('Đang xử lý');
-            const res = await sendMessageWithFriendService({ friendId: friend?.id, message: clone });
-            setMessages((prev) => {
-                const index = _.findIndex(prev, { id: null, message: clone });
+    // const handleSendMessage = async () => {
+    //     try {
+    //         setMessages((prev) => [
+    //             ...prev,
+    //             {
+    //                 id: null,
+    //                 sender: userInfo?.id,
+    //                 message: sendMessage,
+    //             },
+    //         ]);
+    //         const clone = sendMessage;
+    //         setSendMessage('');
+    //         setProcessingMessage('Đang xử lý');
+    //         const res = await sendMessageWithFriendService({ friendId: friend?.id, message: clone });
+    //         setMessages((prev) => {
+    //             const index = _.findIndex(prev, { id: null, message: clone });
 
-                if (index === -1) return prev;
+    //             if (index === -1) return prev;
 
-                const updatedMessages = _.cloneDeep(prev);
-                updatedMessages[index] = { ...updatedMessages[index], id: res?.id };
+    //             const updatedMessages = _.cloneDeep(prev);
+    //             updatedMessages[index] = { ...updatedMessages[index], id: res?.id };
 
-                return updatedMessages;
-            });
-            setProcessingMessage('');
-        } catch (error) {
-            console.log(error);
-            setProcessingMessage('Lỗi');
-        }
-    };
+    //             return updatedMessages;
+    //         });
+    //         setProcessingMessage('');
+    //     } catch (error) {
+    //         console.log(error);
+    //         setProcessingMessage('Lỗi');
+    //     }
+    // };
 
     useEffect(() => {
         const handleNewMessage = (newMessage) => {
@@ -137,11 +190,11 @@ const ChatPopup = ({ friend }) => {
                 ]);
             }
         };
-        socket.on('newMessage', handleNewMessage);
+        // socket.on('newMessage', handleNewMessage);
 
-        return () => {
-            socket.off('newMessage', handleNewMessage);
-        };
+        // return () => {
+        //     socket.off('newMessage', handleNewMessage);
+        // };
     }, [userInfo?.id]);
 
     useEffect(() => {
@@ -227,12 +280,12 @@ const ChatPopup = ({ friend }) => {
                         onChange={(e) => setSendMessage(e.target.value)}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
-                                handleSendMessage();
+                                sendMessageToPerson();
                             }
                         }}
                     />
                     {sendMessage ? (
-                        <i className={clsx(styles['send-message-btn'])} onClick={handleSendMessage}></i>
+                        <i className={clsx(styles['send-message-btn'])} onClick={sendMessageToPerson}></i>
                     ) : (
                         <FontAwesomeIcon className={clsx(styles['link-icon'])} icon={faThumbsUp} />
                     )}

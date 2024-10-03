@@ -239,12 +239,13 @@ namespace SocialNetwork.Services.Services
         }
 
         public void SaveAccessTokenToCookieHttpOnly(string accessToken)
-        {
+        { 
             var cookieOption = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
-                Expires = DateTime.UtcNow.AddDays(1)
+                Secure = true,
+                Expires = DateTime.UtcNow.AddDays(1),
+                SameSite = SameSiteMode.None,
             };
             var httpContext = _httpContextAccessor.HttpContext;
 

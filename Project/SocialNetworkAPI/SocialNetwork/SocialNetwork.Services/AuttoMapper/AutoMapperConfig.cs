@@ -4,8 +4,16 @@
     {
         public AutoMapperConfig()
         {
+
+            //xuoi
+
             CreateMap<UserEntity, UserViewModel>();
+            CreateMap<MessagesEntity, MessageViewModel>();
+
+
+            //nguoc lai
             CreateMap<UserViewModel, UserEntity>();
+            CreateMap<MessageViewModel, MessagesEntity>();
         }
     }
 }

@@ -28,5 +28,20 @@ namespace SocialNetwork.DataAccess.Repositories
             }
             return null;
         }
+
+        public async Task UpdateStatusActiveUser(string userId, bool isActive)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            
+            if(user == null)
+            {
+                throw new ArgumentNullException(nameof(userId), "User not found");
+            }
+
+            user.IsActive = isActive;
+            user.LastLogin = DateTime.Now;
+
+            await _userManager.UpdateAsync(user);
+        }
     }
 }

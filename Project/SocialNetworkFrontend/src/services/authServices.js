@@ -1,32 +1,25 @@
-import axios from 'axios';
-
-// export const loginService = ({ email, password }) => {
-//     return axios.post('/Login/login', {
-//         email,`
-//         password,
-//     });
-// };
+import axios from '~/utils/axios';
 
 export const loginService = async ({ email, password }) => {
     try {
-      const response = await axios.post('http://localhost:5250/api/Login/login', {
-        email: email,  // thay "email" bằng thông tin email thực tế
-        password: password  // thay "password" bằng thông tin mật khẩu thực tế
-      });
-      return response.data; // trả về dữ liệu phản hồi từ API
+        const response = await axios.post('/Login/login', {
+            email: email,
+            password: password,
+        });
+        return response.data;
     } catch (error) {
-      console.error('Error during login:', error);
-      throw error; // ném lỗi để xử lý ở phần khác (nếu cần)
+        console.error('Error during login:', error);
+        throw error;
     }
-  };
+};
 
-export const signUpService = ({ email, password, name, age, school }) => {
-    return axios.post('/auth/signup', {
-        email,
-        password,
-        name,
-        age,
-        school,
+export const signUpService = ({ email, password, firstName, lastName }) => {
+    return axios.post('/Login/singup', {
+        userName: lastName,
+        password: password,
+        email: email,
+        firstName,
+        lastName,
     });
 };
 

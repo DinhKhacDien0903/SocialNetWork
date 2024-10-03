@@ -7,5 +7,7 @@ namespace SocialNetwork.Domain.IRepositories
         Task<UserEntity?> GetByUserNameAsync(string userName);
 
         Task<UserEntity?> GetLoginAsync(LoginRequest loginRequest);
+
+        Task UpdateStatusActiveUser(string userId, bool isActive);
     }
 }
