@@ -14,9 +14,9 @@ const Home = () => {
     return (
         <div className="d-flex justify-content-center mt-5">
             <Post postInfo={{ id: 1 }} />
-            {friendList?.map((friend) => {
+            {/* {friendList?.map((friend) => {
                 return <ChatPopup key={`friend-${friend?.id}`} friend={friend} />;
-            })}
+            })} */}
         </div>
     );
 };
