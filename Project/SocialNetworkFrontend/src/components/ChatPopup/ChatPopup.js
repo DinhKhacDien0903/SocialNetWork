@@ -60,6 +60,7 @@ const initialListMessage = [
 ];
 const ChatPopup = ({ friend }) => {
     const { ref: chatPopupRef, isComponentVisible: isFocus, setIsComponentVisible: setIsFocus } = useClickOutside(true);
+
     const userInfo = useSelector(userInfoSelector);
     // const userInfo = {
     //     id: '9a9cc9b9-be40-431f-89b3-1c736ea41c12',

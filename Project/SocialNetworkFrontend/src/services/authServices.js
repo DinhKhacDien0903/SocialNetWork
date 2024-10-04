@@ -6,6 +6,7 @@ export const loginService = async ({ email, password }) => {
             email: email,
             password: password,
         });
+
         return response.data;
     } catch (error) {
         console.error('Error during login:', error);

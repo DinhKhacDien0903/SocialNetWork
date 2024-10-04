@@ -72,6 +72,7 @@ function Login() {
 
     const handleSubmitFormLogin = async (e) => {
         try {
+            debugger;
             const form = loginFormRef.current;
             if (form.checkValidity() === false) {
                 e.preventDefault();
@@ -88,16 +89,17 @@ function Login() {
                             id: res?.id,
                             firstName: res?.firstName,
                             lastName: res?.lastName,
-                            age: res?.age,
-                            avatar: res?.avatar,
+                            age: '18',
+                            avatar: res?.avatarUrl,
                             homeTown: res?.homeTown,
-                            school: res?.school,
-                            workplace: res?.workplace,
+                            school: 'Haui',
+                            workplace: 'NewwaveJSC',
                         }),
                     );
                     // socket.connect();
                 };
                 fetchPersonalInfo();
+                e.preventDefault();
             }
         } catch (error) {
             console.log(error);

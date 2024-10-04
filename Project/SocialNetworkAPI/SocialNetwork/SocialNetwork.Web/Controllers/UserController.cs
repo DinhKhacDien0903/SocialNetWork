@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using SocialNetwork.DTOs.Authorize;
-using SocialNetwork.DTOs.ViewModels;
 using System.Security.Claims;
 
 namespace SocialNetwork.Web.Controllers

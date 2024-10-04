@@ -140,13 +140,18 @@ namespace SocialNetwork.Web.Controllers
         {
             try
             {
-                var refreshToken = Request.Cookies["refresh_token"];
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                _authServices.RemoveTokenFromCookie("access_token");
+                if(string.IsNullOrEmpty(userId))
+                {
+                    return BadRequest(new BaseResponse
+                    {
+                        Status = 400,
+                        Message = "You must login!"
+                    });
+                }
 
-                _authServices.RemoveTokenFromCookie("refresh_token");
-
-                await _refreshTokenService.UpdateRefreshTokenAsync(refreshToken);
+                await _authServices.LogoutAsync(userId);
 
                 return Ok(new BaseResponse
                 {

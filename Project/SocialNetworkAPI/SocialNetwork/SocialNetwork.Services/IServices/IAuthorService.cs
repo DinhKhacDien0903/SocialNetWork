@@ -20,8 +20,11 @@ namespace SocialNetwork.Services.IServices
 
         ClaimsPrincipal ValidateAccessToken(string accessToken);
 
-        void RemoveTokenFromCookie(string name);
+        void RemoveTokenToCookieHttpOnly(string name);
 
-       
+        Task UpdateStatusActiveUser(string userId, bool isActive);
+
+        Task LogoutAsync(string userId);
+
     }
 }

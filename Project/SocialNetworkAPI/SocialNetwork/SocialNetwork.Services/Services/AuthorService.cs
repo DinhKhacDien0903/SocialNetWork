@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using SocialNetwork.DTOs.Authorize;
+using SocialNetwork.DTOs.Response;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -46,8 +47,6 @@ namespace SocialNetwork.Services.Services
             {
                 throw new Exception("Email or password is not correct!");
             }
-
-            //var userViewModel = _mapper.Map<UserViewModel>(user);
 
             var token = await GenerateJwtToken(user);
 
@@ -255,6 +254,7 @@ namespace SocialNetwork.Services.Services
             };
 
             var result =  await _userManager.CreateAsync(user, signUpRequest.Password);
+
             if (result.Succeeded)
             {
                 if (!await _roleManager.RoleExistsAsync(ApplicationRoleModel.User))
@@ -297,6 +297,37 @@ namespace SocialNetwork.Services.Services
             }
 
             httpContext.Response.Cookies.Delete(name);
+        }
+
+        public async Task UpdateStatusActiveUser(string userId, bool isActive)
+        {
+            await _userRepository.UpdateStatusActiveUser(userId, isActive);
+        }
+
+        public async Task LogoutAsync(string userId)
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            if (httpContext == null)
+            {
+                throw new Exception("HttpContext is not available.");
+            }
+
+            var refreshToken = httpContext.Request.Cookies["refresh_token"];
+
+            RemoveTokenToCookieHttpOnly("access_token");
+
+            RemoveTokenToCookieHttpOnly("refresh_token");
+
+            if(refreshToken == null)
+            {
+                throw new Exception("Refresh token is not available.");
+            }
+
+            await _refreshTokenService.UpdateRefreshTokenAsync(refreshToken);
+
+            await UpdateStatusActiveUser(userId, false);
+
         }
     }
 }
