@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -31,7 +32,9 @@ builder.Services.AddDbContext<SocialNetworkdDataContext>(options =>
 });
 
 builder.Services.AddScoped<IPasswordHasher<IdentityUser>, PasswordHasher<IdentityUser>>();
-
+builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<ICommentRepositories, CommentRepositories>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 
 //builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 //            .AddEntityFrameworkStores<SocialNetworkdDataContext>()
@@ -44,12 +47,13 @@ builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
-builder.Services.AddScoped(typeof(IRefreshTokenRepository),typeof(RefreshTokenRepository));
+builder.Services.AddScoped(typeof(IRefreshTokenRepository), typeof(RefreshTokenRepository));
 
 builder.Services.AddScoped(typeof(IUserService), typeof(UserService));
 builder.Services.AddScoped(typeof(IRefreshTokenService), typeof(RefreshTokenService));
 builder.Services.AddScoped(typeof(IAuthorService), typeof(AuthorService));
-
+builder.Services.AddScoped(typeof(IPostService), typeof(PostService));
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
 builder.Services.AddAuthentication(options =>
 {
@@ -99,6 +103,17 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
+
 
 var app = builder.Build();
 
@@ -117,6 +132,8 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
+app.UseCors("AllowAllOrigins");
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -126,3 +143,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
