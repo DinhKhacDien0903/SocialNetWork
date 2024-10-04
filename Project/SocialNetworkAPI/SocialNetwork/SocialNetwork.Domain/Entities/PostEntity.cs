@@ -14,6 +14,10 @@
         public bool IsDelete { get; set; } = false;
 
         [ForeignKey("UserID")]
-        public UserEntity User { get; set; } = new UserEntity();
+        public UserEntity? User { get; set; } = new UserEntity();
+
+        public ICollection<ImagesOfPostEntity> Images { get; set; } = new List<ImagesOfPostEntity>();
+
+
     }
 }
