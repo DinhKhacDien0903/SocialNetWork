@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using SocialNetwork.DTOs.Authorize;
+using System.Security.Claims;
 
 namespace SocialNetwork.Services.IServices
 {
@@ -15,6 +16,12 @@ namespace SocialNetwork.Services.IServices
 
         Task<IdentityResult> SignUpAsync(SingUpRequest singUpRequest);
 
-        void SaveAccessTokenToCookieHttpOnly(string accessToken);
+        void SaveTokenToCookieHttpOnly(string name, string token, int expiresMinutes);
+
+        ClaimsPrincipal ValidateAccessToken(string accessToken);
+
+        void RemoveTokenFromCookie(string name);
+
+       
     }
 }

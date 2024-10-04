@@ -12,13 +12,20 @@ namespace SocialNetwork.Web.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
+        private const int EXPIRES_ACCESSTOKEN_MINUTES = 15;
+
+        private const int EXPIRES_REFRESHTOKEN_MINUTES = 7 * 24 * 60;
+
         private readonly IAuthorService _authServices;
 
         private readonly IRefreshTokenService _refreshTokenService;
 
         private readonly IConfiguration _configuration;
 
-        public LoginController(IAuthorService authServices, IRefreshTokenService refreshTokenService, IConfiguration configuration)
+        public LoginController(
+            IAuthorService authServices,
+            IRefreshTokenService refreshTokenService,
+            IConfiguration configuration)
         {
             _authServices = authServices;
             _refreshTokenService = refreshTokenService;
@@ -40,13 +47,15 @@ namespace SocialNetwork.Web.Controllers
                         Message = "Not Found User In Server"
                     });
                 }
-                _authServices.SaveAccessTokenToCookieHttpOnly(token.AccessToken);
+
+                _authServices.SaveTokenToCookieHttpOnly("access_token", token.AccessToken, EXPIRES_ACCESSTOKEN_MINUTES);
+
+                _authServices.SaveTokenToCookieHttpOnly("refresh_token", token.RefreshToken, EXPIRES_REFRESHTOKEN_MINUTES);
+
                 return Ok(new BaseResponse
                 {
                     Status = 200,
-                    Message = "Login success",
-                    //Data = token.RefreshToken
-                    Data = token
+                    Message = "Login success"
                 });
             }
             catch(Exception e)
@@ -127,22 +136,17 @@ namespace SocialNetwork.Web.Controllers
 
         [HttpPost("logout")]
         [Authorize]
-        public async Task<IActionResult> Logout(TokenModel tokenModel)
+        public async Task<IActionResult> Logout()
         {
             try
             {
-                bool IsValideToken = await _authServices.ValidateToken(tokenModel);
+                var refreshToken = Request.Cookies["refresh_token"];
 
-                if (!IsValideToken)
-                {
-                    return BadRequest(new BaseResponse
-                    {
-                        Status = 400,
-                        Message = "Invalid token"
-                    });
-                }
+                _authServices.RemoveTokenFromCookie("access_token");
 
-                await _refreshTokenService.UpdateRefreshTokenAsync(tokenModel.RefreshToken);
+                _authServices.RemoveTokenFromCookie("refresh_token");
+
+                await _refreshTokenService.UpdateRefreshTokenAsync(refreshToken);
 
                 return Ok(new BaseResponse
                 {

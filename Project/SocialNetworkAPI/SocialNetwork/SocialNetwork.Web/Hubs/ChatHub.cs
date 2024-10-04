@@ -19,16 +19,24 @@ namespace SocialNetwork.Web.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            var user = await ValidateCurrentAccount();
+            try
+            {
+                var user = await ValidateCurrentAccount();
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, user.Id);      
+                await Groups.AddToGroupAsync(Context.ConnectionId, user.Id);
 
-            await UpdateStatusActiveUser(user.Id, true);
+                await UpdateStatusActiveUser(user.Id, true);
 
-            await Clients.Others.SendAsync("UserConnected", user.Id);
-            
+                await Clients.Others.SendAsync("UserConnected", user.Id);
 
-            await base.OnConnectedAsync();
+
+                await base.OnConnectedAsync();
+            }
+            catch
+            (Exception e)
+            {
+                await Clients.Caller.SendAsync("UserNotConnected", e.Message);
+            }
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
@@ -67,7 +75,16 @@ namespace SocialNetwork.Web.Hubs
 
             var messageID = await _chatHubService.AddMessagePerson(messageViewModel);
 
-            await Clients.User(reciver.Id).SendAsync("ReceiveSpecitificMessage", sender.UserName, message, sendDate);
+            var recevierMessageViewModel = new RecevierMessageViewModel
+            {
+                MessageID = messageID,
+                SenderID = sender.Id,
+                RecevierID = reciver.Id,
+                Message = message,
+                SendDate = sendDate
+            };
+
+            await Clients.User(reciver.Id).SendAsync("ReceiveSpecitificMessage", messageID, message, sendDate);
 
             return messageID;
         }
@@ -88,6 +105,8 @@ namespace SocialNetwork.Web.Hubs
                 await Clients.Caller.SendAsync("UserNotConnected", "You must login to chat!");
 
                 Context.Abort();
+
+                throw new Exception("UserNotConnected!");
             }
 
             return user;

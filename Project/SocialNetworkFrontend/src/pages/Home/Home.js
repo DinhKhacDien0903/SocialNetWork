@@ -4,9 +4,9 @@ import Post from '~/components/Post';
 const Home = () => {
     const friendList = [
         {
-            id: '80fe9c6d-3b7b-44e0-a8bf-226d4c52384e',
-            firstName: '6',
-            lastName: '6',
+            id: '9a9cc9b9-be40-431f-89b3-1c736ea41c12',
+            firstName: 'Trang',
+            lastName: 'Dinh Thi',
             avatar: 'https://res.cloudinary.com/du19iyqz9/image/upload/v1727446956/file_1727446954211.jpg',
             isOnline: true,
         },

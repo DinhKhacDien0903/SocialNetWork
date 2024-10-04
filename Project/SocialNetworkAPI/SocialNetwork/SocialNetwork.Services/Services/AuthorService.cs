@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -62,6 +63,7 @@ namespace SocialNetwork.Services.Services
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim("ID", Guid.NewGuid().ToString()),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
@@ -118,23 +120,51 @@ namespace SocialNetwork.Services.Services
             }
         }
 
+        public ClaimsPrincipal ValidateAccessToken(string accessToken)
+        {
+            try
+            {
+                var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+
+                var screteKeyBytes = Encoding.UTF8.GetBytes(_jwtConfig.SecretKey);
+
+                var tokenValidateParamater = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(screteKeyBytes),
+                    ClockSkew = TimeSpan.Zero,
+                };
+
+                return tokenHandler.ValidateToken(accessToken, tokenValidateParamater, out var validatedToken);
+
+            }
+            catch(Exception e)
+            {
+                throw new SecurityTokenValidationException("Token is not valid", e);
+            }
+        }
+
         public async Task<bool> ValidateToken(TokenModel tokenModel)
         {
-            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            //var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
 
-            var screteKeyBytes = Encoding.UTF8.GetBytes(_jwtConfig.SecretKey);
+            //var screteKeyBytes = Encoding.UTF8.GetBytes(_jwtConfig.SecretKey);
 
-            var tokenValidateParamater = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(screteKeyBytes),
-                ClockSkew = TimeSpan.Zero,
-            };
+            //var tokenValidateParamater = new TokenValidationParameters
+            //{
+            //    ValidateIssuer = false,
+            //    ValidateAudience = false,
+            //    ValidateLifetime = false,
+            //    ValidateIssuerSigningKey = true,
+            //    IssuerSigningKey = new SymmetricSecurityKey(screteKeyBytes),
+            //    ClockSkew = TimeSpan.Zero,
+            //};
 
-            var tokenInVerification = tokenHandler.ValidateToken(tokenModel.AccessToken, tokenValidateParamater, out var validatedToken);
+            var tokenInVerification = ValidateAccessToken(tokenModel.AccessToken);
+            //var tokenInVerification = tokenHandler.ValidateToken(tokenModel.AccessToken, tokenValidateParamater, out var validatedToken);
 
             if (!ValidateHeaderAndPayload(tokenInVerification))
             {
@@ -238,13 +268,13 @@ namespace SocialNetwork.Services.Services
             return result;
         }
 
-        public void SaveAccessTokenToCookieHttpOnly(string accessToken)
+        public void SaveTokenToCookieHttpOnly(string name, string token, int expiresMinutes)
         { 
             var cookieOption = new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
-                Expires = DateTime.UtcNow.AddDays(1),
+                Expires = DateTime.UtcNow.AddDays(expiresMinutes),
                 SameSite = SameSiteMode.None,
             };
             var httpContext = _httpContextAccessor.HttpContext;
@@ -254,7 +284,19 @@ namespace SocialNetwork.Services.Services
                 throw new Exception("HttpContext is not available.");
             }
 
-            httpContext.Response.Cookies.Append("token", accessToken, cookieOption);
+            httpContext.Response.Cookies.Append(name, token, cookieOption);
+        }
+
+        public void RemoveTokenToCookieHttpOnly(string name)
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            if (httpContext == null)
+            {
+                throw new Exception("HttpContext is not available.");
+            }
+
+            httpContext.Response.Cookies.Delete(name);
         }
     }
 }

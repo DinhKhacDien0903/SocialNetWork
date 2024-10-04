@@ -6,6 +6,7 @@ using SocialNetwork.Domain.Entities;
 using SocialNetwork.DTOs.Authorize;
 using SocialNetwork.Services.AuttoMapper;
 using SocialNetwork.Web.Hubs;
+using SocialNetwork.Web.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -153,6 +154,8 @@ app.UseSwaggerUI(c =>
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAllOrigins");
+
+app.UseMiddleware<JWTCookieAuthenticateMiddleware>();
 
 app.UseAuthentication();
 

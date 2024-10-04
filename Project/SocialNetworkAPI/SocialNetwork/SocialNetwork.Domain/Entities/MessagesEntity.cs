@@ -17,9 +17,9 @@
         public bool IsDeleted { get; set; } = false;
 
         [ForeignKey("SenderID")]
-        public UserEntity Sender { get; set; } = new UserEntity(); 
+        public UserEntity? Sender { get; set; }
 
         [ForeignKey("ReciverID")]
-        public UserEntity Receiver { get; set; } = new UserEntity();
+        public UserEntity? Receiver { get; set; }
     }
 }

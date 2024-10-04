@@ -13,5 +13,7 @@ namespace SocialNetwork.Services.IServices
         string HashPassWord(string password);
 
         bool VerifyPassword(string hashedPassword, string providePassword);
+
+        Task<UserViewModel>GetUserInforAsync(string userId);
     }
 }
