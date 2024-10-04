@@ -16,11 +16,11 @@ function Login() {
     const navigate = useNavigate(null);
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        if (localStorage.getItem('isAuthenticated')) {
-            navigate('/');
-        }
-    }, []);
+    // useEffect(() => {
+    //     if (localStorage.getItem('isAuthenticated')) {
+    //         navigate('/');
+    //     }
+    // }, []);
 
     useEffect(() => {
         if (localStorage.getItem('showToastOnLogin')) {
@@ -72,7 +72,6 @@ function Login() {
 
     const handleSubmitFormLogin = async (e) => {
         try {
-            debugger;
             const form = loginFormRef.current;
             if (form.checkValidity() === false) {
                 e.preventDefault();
@@ -83,7 +82,7 @@ function Login() {
                 localStorage.setItem('isAuthenticated', true);
                 navigate('/');
                 const fetchPersonalInfo = async () => {
-                    const res = await getPersonalInfoService();
+                    const res = (await getPersonalInfoService()).data;
                     dispatch(
                         actions.saveUserInfo({
                             id: res?.id,
@@ -97,9 +96,10 @@ function Login() {
                         }),
                     );
                     // socket.connect();
+                    console.log(res);
                 };
                 fetchPersonalInfo();
-                e.preventDefault();
+
             }
         } catch (error) {
             console.log(error);
