@@ -136,6 +136,9 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
+//seed data
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
