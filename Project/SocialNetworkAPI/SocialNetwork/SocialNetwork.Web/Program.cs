@@ -17,8 +17,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddIdentity<UserEntity, IdentityRole>()
-    .AddEntityFrameworkStores<SocialNetworkdDataContext>().AddDefaultTokenProviders();
+//builder.Services.AddIdentity<UserEntity, IdentityRole>()
+//    .AddEntityFrameworkStores<SocialNetworkdDataContext>().AddDefaultTokenProviders();
 
 builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
 {
@@ -127,22 +127,22 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", builder =>
-    {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
-});
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowAll", builder =>
+//    {
+//        builder.AllowAnyOrigin()
+//               .AllowAnyMethod()
+//               .AllowAnyHeader();
+//    });
+//});
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
         builder =>
         {
-            builder.AllowAnyOrigin()
+            builder.WithOrigins("http://localhost:3000")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
