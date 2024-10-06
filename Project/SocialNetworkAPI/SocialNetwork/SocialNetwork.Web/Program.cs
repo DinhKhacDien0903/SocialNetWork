@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SocialNetwork.Domain.Entities;
@@ -15,15 +17,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddIdentity<UserEntity, IdentityRole>()
-    .AddEntityFrameworkStores<SocialNetworkdDataContext>().AddDefaultTokenProviders();
+//builder.Services.AddIdentity<UserEntity, IdentityRole>()
+//    .AddEntityFrameworkStores<SocialNetworkdDataContext>().AddDefaultTokenProviders();
 
-//builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
-//{
-//    options.Stores.MaxLengthForKeys = 128;
-//    options.SignIn.RequireConfirmedAccount = false;
-//}).AddEntityFrameworkStores<SocialNetworkdDataContext>()
-//    .AddDefaultTokenProviders();
+builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
+{
+    options.Stores.MaxLengthForKeys = 128;
+    options.SignIn.RequireConfirmedAccount = false;
+}).AddEntityFrameworkStores<SocialNetworkdDataContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddDbContext<SocialNetworkdDataContext>(options =>
 {
@@ -31,7 +33,9 @@ builder.Services.AddDbContext<SocialNetworkdDataContext>(options =>
 });
 
 builder.Services.AddScoped<IPasswordHasher<IdentityUser>, PasswordHasher<IdentityUser>>();
-
+builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<ICommentRepositories, CommentRepositories>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 
 //builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 //            .AddEntityFrameworkStores<SocialNetworkdDataContext>()
@@ -44,22 +48,16 @@ builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
-builder.Services.AddScoped(typeof(IRefreshTokenRepository),typeof(RefreshTokenRepository));
+builder.Services.AddScoped(typeof(IRefreshTokenRepository), typeof(RefreshTokenRepository));
 
 builder.Services.AddScoped(typeof(IUserService), typeof(UserService));
 builder.Services.AddScoped(typeof(IRefreshTokenService), typeof(RefreshTokenService));
 builder.Services.AddScoped(typeof(IAuthorService), typeof(AuthorService));
 
-builder.Services.AddCors(opt =>
-{
-    opt.AddPolicy("AllowOrigin", builder =>
-    {
-        builder.WithOrigins("http://localhost:3000")
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-    });
-});
+
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped(typeof(IPostService), typeof(PostService));
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
 builder.Services.AddAuthentication(options =>
 {
@@ -129,6 +127,28 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowAll", builder =>
+//    {
+//        builder.AllowAnyOrigin()
+//               .AllowAnyMethod()
+//               .AllowAnyHeader();
+//    });
+//});
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:3000")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        });
+});
+
 
 var app = builder.Build();
 
@@ -147,8 +167,11 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
+app.UseCors("AllowAllOrigins");
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAllOrigins");
 
 app.UseAuthentication();
 
@@ -157,3 +180,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+

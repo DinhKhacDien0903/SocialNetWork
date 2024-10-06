@@ -24,7 +24,7 @@ function App() {
             <Routes>
                 {routes.map((route, index) => {
                     const Page = route.component;
-                    const Layout = DefaultLayout;
+                    let Layout = DefaultLayout;
                     if (route.layout) {
                         Layout = route.layout;
                     } else if (route.layout === null) {
