@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SocialNetwork.DataAccess.SeedData;
@@ -18,15 +20,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddIdentity<UserEntity, IdentityRole>()
-    .AddEntityFrameworkStores<SocialNetworkdDataContext>().AddDefaultTokenProviders();
+//builder.Services.AddIdentity<UserEntity, IdentityRole>()
+//    .AddEntityFrameworkStores<SocialNetworkdDataContext>().AddDefaultTokenProviders();
 
-//builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
-//{
-//    options.Stores.MaxLengthForKeys = 128;
-//    options.SignIn.RequireConfirmedAccount = false;
-//}).AddEntityFrameworkStores<SocialNetworkdDataContext>()
-//    .AddDefaultTokenProviders();
+builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
+{
+    options.Stores.MaxLengthForKeys = 128;
+    options.SignIn.RequireConfirmedAccount = false;
+}).AddEntityFrameworkStores<SocialNetworkdDataContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddDbContext<SocialNetworkdDataContext>(options =>
 {
@@ -34,6 +36,13 @@ builder.Services.AddDbContext<SocialNetworkdDataContext>(options =>
 });
 
 builder.Services.AddScoped<IPasswordHasher<IdentityUser>, PasswordHasher<IdentityUser>>();
+builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<ICommentRepositories, CommentRepositories>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+
+//builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+//            .AddEntityFrameworkStores<SocialNetworkdDataContext>()
+//            .AddDefaultTokenProviders();
 
 builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"));
 
@@ -52,6 +61,8 @@ builder.Services.AddScoped(typeof(IChatHubService), typeof(ChatHubService));
 
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped(typeof(IPostService), typeof(PostService));
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
 builder.Services.AddAuthentication(options =>
 {
@@ -192,3 +203,4 @@ app.MapControllers();
 app.MapHub<ChatHub>("/chatPerson");
 
 app.Run();
+

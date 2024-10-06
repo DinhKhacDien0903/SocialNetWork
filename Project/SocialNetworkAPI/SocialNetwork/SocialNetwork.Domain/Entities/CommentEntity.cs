@@ -1,6 +1,6 @@
 ﻿namespace SocialNetwork.Domain.Entities
 {
-    public class CommentEntity : BaseEntity
+    public class CommentEntity :BaseEntity
     {
         [Key]
         public Guid CommentID { get; set; }
@@ -26,5 +26,7 @@
 
         [ForeignKey("ParentCommentID")]
         public CommentEntity ParentComment { get; set; } = new CommentEntity(); 
+
+        public ICollection<CommentEntity> Replies {  get; set; }=new List<CommentEntity>();
     }
 }
