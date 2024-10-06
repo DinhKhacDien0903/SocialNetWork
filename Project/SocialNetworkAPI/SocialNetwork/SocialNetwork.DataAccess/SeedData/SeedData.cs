@@ -9,12 +9,12 @@ namespace SocialNetwork.DataAccess.SeedData
         {
             var context = serviceProvider.GetRequiredService<SocialNetworkdDataContext>();
 
-
             if (!userManager.Users.Any())
             {
                 var users = new List<UserEntity>();
 
-                for (int i = 1; i <= 10; i++)
+                // Seed 10 users
+                for (int i = 1; i <= 5; i++)
                 {
                     var user = new UserEntity
                     {
@@ -36,41 +36,80 @@ namespace SocialNetwork.DataAccess.SeedData
                     }
                 }
 
-                await context.SaveChangesAsync();
+                // Save users to the database
+                await context.SaveChangesAsync(); // Ensure users are saved before creating relationships
 
-                // Seed messages for each user
+                // Seed relationships for each user
+                if (!context.Set<RelationshipEntity>().Any())
+                {
+                    var relationships = new List<RelationshipEntity>();
+
+                    foreach (var user in users)
+                    {
+                        // Tạo 5 mối quan hệ bạn bè
+                        var friends = users.Where(u => u.Id != user.Id).Take(5).ToList();
+
+                        foreach (var friend in friends)
+                        {
+                            // Thêm quan hệ 2 chiều giữa user và bạn
+                            relationships.Add(new RelationshipEntity
+                            {
+                                UserID = user.Id,
+                                FriendID = friend.Id,
+                                IsDeleted = false
+                            });
+
+                            relationships.Add(new RelationshipEntity
+                            {
+                                UserID = friend.Id,
+                                FriendID = user.Id,
+                                IsDeleted = false
+                            });
+                        }
+                    }
+
+                    // Add relationships to the context and save to the database
+                    context.AddRange(relationships);
+                    await context.SaveChangesAsync(); // Ensure relationships are saved before creating messages
+                }
+
+                // Seed messages between friends
                 if (!context.Set<MessagesEntity>().Any())
                 {
                     var messages = new List<MessagesEntity>();
 
-                    foreach (var user in users)
+                    foreach (var relationship in context.Set<RelationshipEntity>())
                     {
-                        var receiver = users.FirstOrDefault(u => u.Id != user.Id); // Find another user to send message to
+                        var sender = users.FirstOrDefault(u => u.Id == relationship.UserID);
+                        var receiver = users.FirstOrDefault(u => u.Id == relationship.FriendID);
 
-                        if (receiver != null)
+                        if (sender != null && receiver != null)
                         {
+                            // Tạo tin nhắn từ sender đến receiver
                             messages.Add(new MessagesEntity
                             {
                                 MessageID = Guid.NewGuid(),
-                                Content = $"Hello from {user.UserName}",
-                                SenderID = user.Id,
+                                Content = $"Hello from {sender.UserName} to {receiver.UserName}",
+                                SenderID = sender.Id,
                                 ReciverID = receiver.Id,
                                 IsDeleted = false,
                                 CreatedAt = DateTime.UtcNow.AddMinutes(-10)
                             });
 
+                            // Tạo tin nhắn phản hồi từ receiver đến sender
                             messages.Add(new MessagesEntity
                             {
                                 MessageID = Guid.NewGuid(),
-                                Content = $"Reply from {receiver.UserName}",
+                                Content = $"Reply from {receiver.UserName} to {sender.UserName}",
                                 SenderID = receiver.Id,
-                                ReciverID = user.Id,
+                                ReciverID = sender.Id,
                                 IsDeleted = false,
                                 CreatedAt = DateTime.UtcNow.AddMinutes(-5)
                             });
                         }
                     }
 
+                    // Add messages to the context and save to the database
                     context.AddRange(messages);
                     await context.SaveChangesAsync();
                 }

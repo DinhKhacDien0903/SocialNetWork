@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SocialNetwork.DataAccess.SeedData;
 using SocialNetwork.Domain.Entities;
 using SocialNetwork.DTOs.Authorize;
 using SocialNetwork.Services.AuttoMapper;
@@ -134,10 +135,32 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddSignalR();
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 var app = builder.Build();
 
 //seed data
+using(var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
 
+    var userManager = services.GetRequiredService<UserManager<UserEntity>>();
+
+    var dbContext = services.GetRequiredService<SocialNetworkdDataContext>();
+
+    try
+    {
+        await dbContext.Database.MigrateAsync();
+
+        await SeedData.Initialize(services, userManager);
+    }catch(Exception e)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(e, "An error occurred while seeding the database");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

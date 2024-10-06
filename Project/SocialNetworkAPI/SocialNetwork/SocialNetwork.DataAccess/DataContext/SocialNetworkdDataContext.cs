@@ -59,18 +59,6 @@ namespace SocialNetwork.DataAccess.DataContext
             modelBuilder.Entity<GroupChatMessageStatusEntity>()
                .HasKey(g => new { g.GroupChatMessageID, g.UserID});
 
-            //modelBuilder.Entity<UserEntity>()
-            //    .Property(u => u.Id)
-            //    .HasDefaultValueSql("NEWSEQUENTIALID()");
-
-            //modelBuilder.Entity<UserEntity>()
-            //    .Property(u => u.CreatedAt)
-            //    .HasDefaultValueSql("GetDate()");
-
-            //modelBuilder.Entity<UserEntity>()
-            //    .Property(u => u.UpdatedAt)
-            //    .HasDefaultValueSql("GetDate()");
-
             base.OnModelCreating(modelBuilder);
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
