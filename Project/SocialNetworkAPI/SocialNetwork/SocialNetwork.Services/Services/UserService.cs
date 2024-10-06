@@ -35,13 +35,22 @@ namespace SocialNetwork.Services.Services
         public async Task<IEnumerable<UserViewModel>> GetAllUsersAsync()
         {
             var users = await _userRepository.GetAllAsync();
+
             return _mapper.Map<IEnumerable<UserViewModel>>(users);
         }
 
         public async Task<UserViewModel> GetUserByIdAsync(string id)
         {
             var user = await _userRepository.GetByIDAsync(id);
+
             return _mapper.Map<UserViewModel>(user);
+        }
+
+        public async Task<UserViewModel> GetUserInforAsync(string userId)
+        {
+            var userEntity = await _userRepository.GetUserInfor(userId);
+
+            return _mapper.Map<UserViewModel>(userEntity);
         }
 
         public string HashPassWord(string password)

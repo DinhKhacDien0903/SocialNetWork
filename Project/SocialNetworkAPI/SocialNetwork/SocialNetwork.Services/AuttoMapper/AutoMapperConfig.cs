@@ -20,6 +20,16 @@ namespace SocialNetwork.Services.AuttoMapper
 
             CreateMap<ImagesOfPostViewModel, ImagesOfPostEntity>();
             CreateMap<CommentViewModel,CommentEntity>().ReverseMap();
+
+            //xuoi
+
+            CreateMap<UserEntity, UserViewModel>();
+            CreateMap<MessagesEntity, MessageViewModel>();
+
+
+            //nguoc lai
+            CreateMap<UserViewModel, UserEntity>();
+            CreateMap<MessageViewModel, MessagesEntity>();
         }
     }
 }

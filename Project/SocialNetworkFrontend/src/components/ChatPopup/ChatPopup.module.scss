@@ -9,6 +9,7 @@
     box-shadow: 0 0 0 0.1rem $box-shadow;
     border-top-right-radius: 1rem;
     border-top-left-radius: 1rem;
+    z-index: 1;
 
     & + .chat-wrapper {
         right: 38rem;

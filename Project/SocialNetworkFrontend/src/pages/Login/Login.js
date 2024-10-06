@@ -16,11 +16,11 @@ function Login() {
     const navigate = useNavigate(null);
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        if (localStorage.getItem('isAuthenticated')) {
-            navigate('/');
-        }
-    }, []);
+    // useEffect(() => {
+    //     if (localStorage.getItem('isAuthenticated')) {
+    //         navigate('/');
+    //     }
+    // }, []);
 
     useEffect(() => {
         if (localStorage.getItem('showToastOnLogin')) {
@@ -82,22 +82,24 @@ function Login() {
                 localStorage.setItem('isAuthenticated', true);
                 navigate('/');
                 const fetchPersonalInfo = async () => {
-                    const res = await getPersonalInfoService();
+                    const res = (await getPersonalInfoService()).data;
                     dispatch(
                         actions.saveUserInfo({
                             id: res?.id,
                             firstName: res?.firstName,
                             lastName: res?.lastName,
-                            age: res?.age,
-                            avatar: res?.avatar,
+                            age: '18',
+                            avatar: res?.avatarUrl,
                             homeTown: res?.homeTown,
-                            school: res?.school,
-                            workplace: res?.workplace,
+                            school: 'Haui',
+                            workplace: 'NewwaveJSC',
                         }),
                     );
                     // socket.connect();
+                    console.log(res);
                 };
                 fetchPersonalInfo();
+
             }
         } catch (error) {
             console.log(error);

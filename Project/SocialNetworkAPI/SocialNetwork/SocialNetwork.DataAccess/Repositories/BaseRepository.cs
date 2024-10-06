@@ -10,9 +10,10 @@
             _dbSet = _context.Set<T>();
         }
 
-        public async Task AddAsync(T entity)
+        public async Task<T> AddAsync(T entity)
         {
              await _dbSet.AddAsync(entity);
+             return entity;
         }
 
         public void Delete(T entity)

@@ -4,9 +4,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SocialNetwork.DataAccess.SeedData;
 using SocialNetwork.Domain.Entities;
 using SocialNetwork.DTOs.Authorize;
 using SocialNetwork.Services.AuttoMapper;
+using SocialNetwork.Web.Hubs;
+using SocialNetwork.Web.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,11 +51,13 @@ builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
-builder.Services.AddScoped(typeof(IRefreshTokenRepository), typeof(RefreshTokenRepository));
+builder.Services.AddScoped(typeof(IRefreshTokenRepository),typeof(RefreshTokenRepository));
+builder.Services.AddScoped(typeof(IMessageRepository),typeof(MessageRepository));
 
 builder.Services.AddScoped(typeof(IUserService), typeof(UserService));
 builder.Services.AddScoped(typeof(IRefreshTokenService), typeof(RefreshTokenService));
 builder.Services.AddScoped(typeof(IAuthorService), typeof(AuthorService));
+builder.Services.AddScoped(typeof(IChatHubService), typeof(ChatHubService));
 
 
 builder.Services.AddHttpContextAccessor();
@@ -127,16 +132,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowAll", builder =>
-//    {
-//        builder.AllowAnyOrigin()
-//               .AllowAnyMethod()
-//               .AllowAnyHeader();
-//    });
-//});
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
@@ -149,8 +144,34 @@ builder.Services.AddCors(options =>
         });
 });
 
+builder.Services.AddSignalR();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
 
 var app = builder.Build();
+
+//seed data
+using(var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var userManager = services.GetRequiredService<UserManager<UserEntity>>();
+
+    var dbContext = services.GetRequiredService<SocialNetworkdDataContext>();
+
+    try
+    {
+        await dbContext.Database.MigrateAsync();
+
+        await SeedData.Initialize(services, userManager);
+    }catch(Exception e)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(e, "An error occurred while seeding the database");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -167,17 +188,19 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
-app.UseCors("AllowAllOrigins");
-
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAllOrigins");
+
+app.UseMiddleware<JWTCookieAuthenticateMiddleware>();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<ChatHub>("/chatPerson");
 
 app.Run();
 

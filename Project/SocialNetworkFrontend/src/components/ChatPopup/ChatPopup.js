@@ -12,12 +12,57 @@ import socket from '~/socket';
 import _ from 'lodash';
 import useClickOutside from '~/hook/useClickOutside';
 
+import { HubConnectionBuilder } from '@microsoft/signalr';
+
+const initialListMessage = [
+        {
+            id: '67a43e79-1318-44ad-8303-f7a195795fae',
+        sender: '80fe9c6d-3b7b-44e0-a8bf-226d4c52384e',
+        receiver: '72348b73-1997-41bc-a7f3-bccba9cf99d0',
+            message: 'ê',
+        },
+        {
+            id: 'f1ae90b2-9409-4fdc-afa0-b37c4726af03',
+        sender: '72348b73-1997-41bc-a7f3-bccba9cf99d0',
+        receiver: '80fe9c6d-3b7b-44e0-a8bf-226d4c52384e',
+            message: 'hello anh em nha mình đang bạn xíu tí mình vô nhé pp ae',
+        },
+        {
+            id: '41663581-c79c-4014-8514-5308942a5280',
+        sender: '72348b73-1997-41bc-a7f3-bccba9cf99d0',
+        receiver: '80fe9c6d-3b7b-44e0-a8bf-226d4c52384e',
+            message: 'fasdfashdfasdfjasdfhasdfuyeiwthbdsghdsfkgdfg',
+        },
+        {
+            id: '0d50ed85-3d16-4a98-8779-7cbbaec7c24b',
+        sender: '72348b73-1997-41bc-a7f3-bccba9cf99d0',
+        receiver: '80fe9c6d-3b7b-44e0-a8bf-226d4c52384e',
+            message: 'tyutyu',
+        },
+        {
+            id: '0b3785fc-ee00-44cc-8041-884b50b02b32',
+        sender: '72348b73-1997-41bc-a7f3-bccba9cf99d0',
+        receiver: '80fe9c6d-3b7b-44e0-a8bf-226d4c52384e',
+            message: 'ghghj',
+        },
+        {
+            id: '1c4a40fb-ebe7-42a6-8b77-32b44f75e3db',
+        sender: '72348b73-1997-41bc-a7f3-bccba9cf99d0',
+        receiver: '80fe9c6d-3b7b-44e0-a8bf-226d4c52384e',
+            message: 'gjhj',
+        },
+        {
+            id: '07f59b7f-6bf6-4dc2-9f29-17611c4527fc',
+        sender: '80fe9c6d-3b7b-44e0-a8bf-226d4c52384e',
+        receiver: '72348b73-1997-41bc-a7f3-bccba9cf99d0',
+            message: 'tyutyu',
+        },
+    ];
 const ChatPopup = ({ friend }) => {
     const { ref: chatPopupRef, isComponentVisible: isFocus, setIsComponentVisible: setIsFocus } = useClickOutside(true);
-    // const userInfo = useSelector(userInfoSelector);
-    const userInfo = {
-        id: 'e8490337-4a87-4665-b0d4-8fea750488ba',
-    };
+
+    const userInfo = useSelector(userInfoSelector);
+
     const dispatch = useDispatch();
 
     const endOfMessagesRef = useRef(null);
@@ -25,64 +70,106 @@ const ChatPopup = ({ friend }) => {
     const [messages, setMessages] = useState([]);
 
     const [sendMessage, setSendMessage] = useState('');
+
     const [processingMessage, setProcessingMessage] = useState('');
 
-    const messageList = [
-        {
-            id: '67a43e79-1318-44ad-8303-f7a195795fae',
-            sender: '74aced50-c597-4f25-9c08-9642a5c93b5b',
-            receiver: 'e8490337-4a87-4665-b0d4-8fea750488ba',
-            message: 'ê',
-        },
-        {
-            id: 'f1ae90b2-9409-4fdc-afa0-b37c4726af03',
-            sender: 'e8490337-4a87-4665-b0d4-8fea750488ba',
-            receiver: '74aced50-c597-4f25-9c08-9642a5c93b5b',
-            message: 'hello anh em nha mình đang bạn xíu tí mình vô nhé pp ae',
-        },
-        {
-            id: '41663581-c79c-4014-8514-5308942a5280',
-            sender: 'e8490337-4a87-4665-b0d4-8fea750488ba',
-            receiver: '74aced50-c597-4f25-9c08-9642a5c93b5b',
-            message: 'fasdfashdfasdfjasdfhasdfuyeiwthbdsghdsfkgdfg',
-        },
-        {
-            id: '0d50ed85-3d16-4a98-8779-7cbbaec7c24b',
-            sender: 'e8490337-4a87-4665-b0d4-8fea750488ba',
-            receiver: '74aced50-c597-4f25-9c08-9642a5c93b5b',
-            message: 'tyutyu',
-        },
-        {
-            id: '0b3785fc-ee00-44cc-8041-884b50b02b32',
-            sender: 'e8490337-4a87-4665-b0d4-8fea750488ba',
-            receiver: '74aced50-c597-4f25-9c08-9642a5c93b5b',
-            message: 'ghghj',
-        },
-        {
-            id: '1c4a40fb-ebe7-42a6-8b77-32b44f75e3db',
-            sender: 'e8490337-4a87-4665-b0d4-8fea750488ba',
-            receiver: '74aced50-c597-4f25-9c08-9642a5c93b5b',
-            message: 'gjhj',
-        },
-        {
-            id: '07f59b7f-6bf6-4dc2-9f29-17611c4527fc',
-            sender: '74aced50-c597-4f25-9c08-9642a5c93b5b',
-            receiver: 'e8490337-4a87-4665-b0d4-8fea750488ba',
-            message: 'tyutyu',
-        },
-    ];
+    const [conn, setConn] = useState('');
+
+    const [error, setError] = useState('');
+    useEffect(() => {
+        setMessages(initialListMessage);
+    }, []);
 
     useEffect(() => {
-        const fetchMessages = async () => {
+        const connection = new HubConnectionBuilder().withUrl('https://localhost:7072/chatPerson').build();
+        // Mở kết nối
+        const startConnection = async () => {
             try {
-                // const res = await getMessagesWithFriendService(friend?.id);
-                setMessages(messageList);
+                await connection.start();
+
+                setConn(connection);
+
+                connection.on('UserNotConnected', (errorMessage) => {
+                    setError(errorMessage);
+                    console.error('Error received: ', errorMessage);
+                });
+
+                connection.on('ReceiveSpecitificMessage', ({ messageID, message, sendDate }) => {
+                    setMessages((prev) => {
+                        return [
+                            ...prev,
+                            {
+                                id: messageID,
+                                sender: friend?.id,
+                                receiver: userInfo?.id,
+                                message,
+                            },
+                        ];
+                    });
+
+                    console.log(`${sender} has send ${message}`);
+                });
             } catch (error) {
-                console.log(error);
+                console.error('Error establishing connection:', error);
             }
         };
         fetchMessages();
     }, [friend]);
+
+        startConnection();
+
+        return () => {
+            if (connection) {
+                connection.stop();
+                console.log('Connection closed');
+            }
+        };
+    }, []);
+
+    const sendMessageToPerson = async () => {
+        console.log('Start chat >>>>>>');
+        try {
+            const message = sendMessage;
+
+            setSendMessage('');
+
+            setMessages((prev) => {
+                return [
+                ...prev,
+                {
+                    id: null,
+                    sender: userInfo?.id,
+                        receiver: friend?.id,
+                        message,
+                },
+                ];
+            });
+
+            setProcessingMessage('Đang xử lý');
+
+            var messageId = await conn.invoke('SendMessageToPerson', friend?.id, message);
+
+            console.log('MessageId: ', messageId);
+
+            setMessages((prev) => {
+                const index = _.findIndex(prev, { id: null, message });
+
+                if (index === -1) return prev;
+
+                const updatedMessages = _.cloneDeep(prev);
+
+                updatedMessages[index] = { ...updatedMessages[index], id: messageId };
+
+                return updatedMessages;
+            });
+
+            setProcessingMessage('');
+
+            console.log(`Sending message to ${friend?.id}: ${message}`);
+        } catch (e) {
+            console.log(e.message);
+        }
+    };
 
     useEffect(() => {
         endOfMessagesRef.current.scrollTop = endOfMessagesRef.current.scrollHeight;
@@ -92,37 +179,6 @@ const ChatPopup = ({ friend }) => {
         dispatch(actions.closeChat(friend?.id));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [friend?.id]);
-
-    const handleSendMessage = async () => {
-        try {
-            setMessages((prev) => [
-                ...prev,
-                {
-                    id: null,
-                    sender: userInfo?.id,
-                    message: sendMessage,
-                },
-            ]);
-            const clone = sendMessage;
-            setSendMessage('');
-            setProcessingMessage('Đang xử lý');
-            const res = await sendMessageWithFriendService({ friendId: friend?.id, message: clone });
-            setMessages((prev) => {
-                const index = _.findIndex(prev, { id: null, message: clone });
-
-                if (index === -1) return prev;
-
-                const updatedMessages = _.cloneDeep(prev);
-                updatedMessages[index] = { ...updatedMessages[index], id: res?.id };
-
-                return updatedMessages;
-            });
-            setProcessingMessage('');
-        } catch (error) {
-            console.log(error);
-            setProcessingMessage('Lỗi');
-        }
-    };
 
     useEffect(() => {
         const handleNewMessage = (newMessage) => {
@@ -227,12 +283,12 @@ const ChatPopup = ({ friend }) => {
                         onChange={(e) => setSendMessage(e.target.value)}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
-                                handleSendMessage();
+                                sendMessageToPerson();
                             }
                         }}
                     />
                     {sendMessage ? (
-                        <i className={clsx(styles['send-message-btn'])} onClick={handleSendMessage}></i>
+                        <i className={clsx(styles['send-message-btn'])} onClick={sendMessageToPerson}></i>
                     ) : (
                         <FontAwesomeIcon className={clsx(styles['link-icon'])} icon={faThumbsUp} />
                     )}
